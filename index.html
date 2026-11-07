@@ -123,6 +123,8 @@ main .hero p { margin-top: 9px; }
 .crm-links { display: flex; flex-wrap: wrap; gap: 7px; }
 .crm-links a { padding: 7px 10px; border: 1px solid #b9dbce; border-radius: 8px; background: var(--panel); font-size: 12px; font-weight: 720; text-decoration: none; }
 .crm-links a:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
+.crm-sections h2 { font-size: 18px; letter-spacing: -.025em; }
+.crm-section-link { margin-top: auto; padding-top: 4px; font-size: 13px; font-weight: 700; }
 .lead-crm-link { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 9px; margin-top: 10px; font-size: 13px; }
 #leadFilters { padding: 16px; }
 #leadFilters .section-head { margin-bottom: 10px; }
@@ -163,6 +165,8 @@ main .hero p { margin-top: 9px; }
 }
 @media(max-width:620px) {
  main .hero { padding: 22px 18px; }
+ .nav { gap: 9px; }
+ .nav a { line-height: 1.2; }
  .market-charts { grid-template-columns: 1fr; }
  #auto-market .market-tile { min-height: 0; }
  .market-tile { padding: 15px; }
@@ -182,7 +186,7 @@ main .hero p { margin-top: 9px; }
     <a class="sheet" id="sheetTop" target="_blank" rel="noopener">Google Таблица ↗</a></div>
 </header>
 <div class="nav-wrap"><nav class="container nav" aria-label="Разделы">
-  <a href="#market">Рынок и доходы</a><a href="#leads">Лиды и конкуренция</a><a href="#model">Модель продаж</a>
+  <a href="#market">Рынок и доходы</a><a href="#leads">Лиды и конкуренция</a><a href="#model">Модель продаж</a><a href="#crm">CRM</a>
 </nav></div>
 <main class="container" id="main" tabindex="-1"></main>
 <footer class="container"><strong>FIVEROX · Региональная аналитика</strong><span>Снимок данных на 7 ноября 2026 года</span><a id="sheetFoot" target="_blank" rel="noopener">Google Таблица ↗</a></footer>
@@ -376,7 +380,6 @@ function leadsView(){
  main.innerHTML=hero('Лиды и конкуренция · Проверка 07.11.2026','Оклейка и тонировка','Точки Чеченской Республики. Контакты, услуги и прайсы — в карточках.')
  +'<section class="metrics lead-metrics" aria-label="Сводка базы">'+metric('Точки в базе',summary.total)+metric('Подтверждённые',summary.confirmed)+metric('Обе услуги',counts['Оклейка + тонировка']??0)+metric('Кандидаты',summary.candidates)+'</section>'
  +'<details class="disclosure lead-overview" id="lead-overview"'+(leadOverviewOpen?' open':'')+'><summary>Графики конкуренции</summary>'+leadCharts()+'</details>'
- +'<section class="crm-entry" aria-labelledby="crm-entry-title"><div><h2 id="crm-entry-title">CRM для менеджера</h2><p>Карточки, воронка и следующие контакты · вход владельца через Google</p></div><div class="crm-links">'+link(crmBookUrl,'Открыть CRM ↗')+link(crmBookUrl+'#gid=704101002','Очередь ↗')+'</div></section>'
  +'<section class="panel" id="leadFilters"><div class="section-head"><div><div class="eyebrow">Рабочий список</div><h2>Найти точку</h2></div><p>'+sheet+'</p></div><div class="filters">'
  +'<label>Поиск<input id="query" type="search" placeholder="Название, адрес или телефон" value="'+esc(state.query)+'"></label>'
  +select('geo','Территория',[['','Вся республика'],['Грозный','Грозный'],['Вне Грозного','Вне Грозного']])
@@ -467,7 +470,19 @@ function modelView(){
  });
  update();
 }
-const views={market:marketView,leads:leadsView,model:modelView};
+function crmView(){
+ const sections=[
+  ['Карточки лидов','Этапы, ответственные, заметки и следующий шаг.',crmCardsUrl,'Открыть карточки ↗'],
+  ['Очередь контактов','Просроченные контакты, задачи на сегодня и будущие встречи.',crmBookUrl+'#gid=704101002','Открыть очередь ↗'],
+  ['История контактов','Звонки, сообщения, встречи и результаты общения.',crmBookUrl+'#gid=704101003','Открыть историю ↗'],
+ ];
+ main.innerHTML=hero('FIVEROX · рабочий кабинет','CRM','Рабочая база Чеченской Республики.')
+  +'<section class="crm-entry" aria-labelledby="crm-entry-title"><div><h2 id="crm-entry-title">Обзор и воронка</h2><p>Доступ владельцу через Google. Таблица откроется в новой вкладке.</p></div><div class="crm-links">'+link(crmBookUrl,'Открыть CRM ↗')+'</div></section>'
+  +'<section class="chart-grid crm-sections" aria-label="Разделы CRM">'+sections.map(([title,description,url,label])=>
+   '<article class="chart"><h2>'+esc(title)+'</h2><p class="chart-sub">'+esc(description)+'</p><div class="crm-section-link">'+link(url,label)+'</div></article>'
+  ).join('')+'</section>';
+}
+const views={market:marketView,leads:leadsView,model:modelView,crm:crmView};
 function route(){
  const key=location.hash.slice(1);
  const tab=Object.hasOwn(views,key)?key:'market';
