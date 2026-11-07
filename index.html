@@ -232,7 +232,9 @@ const crmWeb = (() => {
    return;
   }
 
-  login.href=deployed;
+  const accountChooser=new URL('https://accounts.google.com/AccountChooser');
+  accountChooser.searchParams.set('continue',deployed);
+  login.href=accountChooser.href;
   login.hidden=false;
   button.disabled=false;
   let timer,channel;
@@ -263,7 +265,7 @@ const crmWeb = (() => {
    timer=setTimeout(()=>{
     if(!root.isConnected)return;
     button.disabled=false;
-    status.textContent='Если редактор не загрузился, войдите через Google под аккаунтом с правами редактора таблицы и попробуйте снова.';
+    status.textContent='Нажмите «Войти через Google» и выберите аккаунт редактора таблицы. Если Google не открывает CRM при нескольких аккаунтах, используйте приватное окно с одним аккаунтом.';
    },12000);
   });
  }
