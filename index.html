@@ -121,7 +121,7 @@ main .hero p { margin-top: 9px; }
 .crm-entry h2 { font-size: 18px; letter-spacing: -.025em; }
 .crm-entry p, .lead-crm-link span { color: var(--muted); font-size: 12px; }
 .crm-links { display: flex; flex-wrap: wrap; gap: 7px; }
-.crm-links a { padding: 7px 10px; border: 1px solid #b9dbce; border-radius: 8px; background: var(--panel); font-size: 12px; font-weight: 720; text-decoration: none; }
+.crm-links a, .crm-links button { padding: 7px 10px; border: 1px solid #b9dbce; border-radius: 8px; background: var(--panel); color: var(--accent); font-size: 12px; font-weight: 720; text-decoration: none; }
 .crm-links a:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
 .crm-sections h2 { font-size: 18px; letter-spacing: -.025em; }
 .crm-section-link { margin-top: auto; padding-top: 4px; font-size: 13px; font-weight: 700; }
@@ -129,8 +129,7 @@ main .hero p { margin-top: 9px; }
 .crm-status:empty { display: none; }
 #crmInline [hidden] { display: none; }
 .crm-frame { display: block; width: 100%; height: min(800px, 82vh); min-height: 510px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); margin-bottom: 12px; }
-#crmOpen { background: var(--accent); color: #fff; border-color: var(--accent); }
-#crmOpen:hover { background: #00554f; }
+#crmOpen:hover { background: #e3f3e9; }
 #crmOpen:disabled { opacity: .58; cursor: default; }
 .lead-crm-link { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 9px; margin-top: 10px; font-size: 13px; }
 #leadFilters { padding: 16px; }
@@ -224,7 +223,6 @@ const crmWeb = (() => {
  function mount(root){
   unmount?.();
   const button=root.querySelector('#crmOpen');
-  const login=root.querySelector('#crmGoogleLogin');
   const directLink=root.querySelector('#crmDirectLink');
   const status=root.querySelector('#crmStatus');
   const frame=root.querySelector('#crmFrame');
@@ -233,10 +231,6 @@ const crmWeb = (() => {
    return;
   }
 
-  const accountChooser=new URL('https://accounts.google.com/AccountChooser');
-  accountChooser.searchParams.set('continue',deployed);
-  login.href=accountChooser.href;
-  login.hidden=false;
   directLink.href=deployed;
   directLink.hidden=false;
   button.disabled=false;
@@ -268,7 +262,7 @@ const crmWeb = (() => {
    timer=setTimeout(()=>{
     if(!root.isConnected)return;
     button.disabled=false;
-    status.textContent='Нажмите «Войти через Google» и выберите аккаунт редактора таблицы. Если Google не открывает CRM при нескольких аккаунтах, используйте приватное окно с одним аккаунтом.';
+    status.textContent='Редактор внутри страницы не загрузился. Нажмите «CRM в новой вкладке».';
    },12000);
   });
  }
@@ -561,8 +555,8 @@ function crmView(){
  ];
  main.innerHTML=hero('FIVEROX · рабочий кабинет','CRM','Рабочая база Чеченской Республики.')
   +`<section id="crmInline" aria-label="Редактор CRM">
-   <div class="crm-entry"><div><h2>Воронка и карточки</h2><p>Доступ через Google для владельца и редакторов закрытой таблицы.</p></div>
-    <div class="crm-links"><button id="crmOpen" class="button" type="button" disabled>Открыть редактор</button><a id="crmGoogleLogin" target="_blank" rel="noopener noreferrer" hidden>Войти через Google ↗</a><a id="crmDirectLink" target="_blank" rel="noopener noreferrer" hidden>CRM в новой вкладке ↗</a></div>
+   <div class="crm-entry"><div><h2>Воронка и карточки</h2><p>Доступ через Google для владельца и редакторов закрытой таблицы.</p><p>Если в браузере открыто несколько Google-аккаунтов, откройте CRM в приватном окне и войдите под одним аккаунтом редактора.</p></div>
+    <div class="crm-links"><a id="crmDirectLink" class="button" target="_blank" rel="noopener noreferrer" hidden>CRM в новой вкладке ↗</a><button id="crmOpen" type="button" disabled>Открыть редактор</button></div>
     <p id="crmStatus" class="crm-status" role="status"></p>
    </div>
    <iframe id="crmFrame" class="crm-frame" title="Редактор карточек FIVEROX CRM" referrerpolicy="no-referrer" hidden></iframe>
