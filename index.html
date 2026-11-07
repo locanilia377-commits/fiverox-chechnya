@@ -193,7 +193,7 @@ main .hero p { margin-top: 9px; }
     <a class="sheet" id="sheetTop" target="_blank" rel="noopener">Google Таблица ↗</a></div>
 </header>
 <div class="nav-wrap"><nav class="container nav" aria-label="Разделы">
-  <a href="#market">Рынок и доходы</a><a href="#leads">Лиды и конкуренция</a><a href="#model">Модель продаж</a><a href="#crm">CRM</a>
+  <a href="#market">Рынок и доходы</a><a href="#leads">Лиды и конкуренция</a><a href="#model">Модель продаж</a><a href="#crm">Личный кабинет</a>
 </nav></div>
 <main class="container" id="main" tabindex="-1"></main>
 <footer class="container"><strong>FIVEROX · Региональная аналитика</strong><span>Снимок данных на 7 ноября 2026 года</span><a id="sheetFoot" target="_blank" rel="noopener">Google Таблица ↗</a></footer>
@@ -272,7 +272,7 @@ const crmWeb = (() => {
    timer=setTimeout(()=>{
     if(!root.isConnected)return;
     button.disabled=false;
-    status.textContent='Редактор внутри страницы не загрузился. Нажмите «CRM в новой вкладке».';
+    status.textContent='Редактор внутри страницы не загрузился. Нажмите «Личный кабинет в новой вкладке».';
    },12000);
   },{signal:controller.signal});
  }
@@ -300,7 +300,6 @@ const tr=(a,fn)=>a.map(r=>'<tr>'+fn(r).map(x=>'<td>'+x+'</td>').join('')+'</tr>'
 const table=(heads,body)=>'<div class="table-wrap"><table><thead><tr>'+heads.map(x=>'<th scope="col">'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>';
 const sheet=link(sheetUrl,'Открыть Google Таблицу ↗');
 const crmBookUrl='https://docs.google.com/spreadsheets/d/1g2-j42pdbResuAA55GEGUtDvvfgKgslkcKMRTB-_fts/edit';
-const crmCardsUrl=crmBookUrl+'#gid=704101001';
 document.querySelector('#sheetTop').href=sheetUrl;
 document.querySelector('#sheetFoot').href=sheetUrl;
 const disclosure=(label,body)=>'<details class="disclosure"><summary>'+esc(label)+'</summary><div class="disclosure-body">'+body+'</div></details>';
@@ -518,7 +517,7 @@ function openLead(id){
    +(p.description?'<p>'+esc(p.description)+'</p>':'')+'<p class="lead-price-meta">'+esc(p.type)+(p.updated?' · '+esc(p.updated):'')+'</p><p class="lead-price-links">'+link(p.url,p.source+' ↗')+(p.alternativeUrl?link(p.alternativeUrl,'Дубль источника ↗'):'')+'</p></article>';
  }).join('')+'</div>':'<p class="note">Позиции по плёнкам в просмотренных прайсах не найдены.</p>';
  document.querySelector('#dialogContent').innerHTML='<div class="lead-dialog-header"><div class="eyebrow">Карточка '+esc(l.id)+'</div><h2 id="dialogTitle">'+esc(l.name)+'</h2><p>'+esc(l.city)+' · '+esc(l.address)+'</p><p class="pills">'+profilePill(l)+'</p></div>'
- +'<p class="lead-crm-link">'+link(crmCardsUrl,'Перейти к карточкам CRM ↗')+' <span>Вход через Google · поиск по названию или ID</span></p>'
+ +'<p class="lead-crm-link"><a href="#crm">Перейти в личный кабинет</a> <span>Рабочие карточки доступны после входа</span></p>'
  +'<section class="dialog-section"><h3>Контакты</h3>'+(contacts.length?'<ul class="lead-contact-list">'+contacts.map(contact=>'<li>'+contact+'</li>').join('')+'</ul>':'<p class="note">Контакты в просмотренных источниках не указаны.</p>')+(l.hours?'<p>'+esc(l.hours)+'</p>':'')+'<p>'+sources+'</p>'
  +l.ratings.filter(x=>x.rating!=null).map(x=>'<p>'+esc(x.source)+' · '+fmt(x.rating)+' / 5'+(x.reviews!=null?' · отзывов '+fmt(x.reviews):'')+'</p>').join('')+'</section>'
  +'<section class="dialog-section"><h3>Прайс</h3>'+prices+(l.prices.length?'<p class="note">Сортировка учитывает опубликованные суммы. Дата в позиции — из прайса.</p>':'')+'</section>'
@@ -589,28 +588,22 @@ function modelView(){
  inputs.forEach(showCommittedValue);
 }
 function crmView(){
- const sections=[
-  ['Карточки лидов','Этапы, ответственные, заметки и следующий шаг.',crmCardsUrl,'Открыть карточки ↗'],
-  ['Очередь контактов','Просроченные контакты, задачи на сегодня и будущие встречи.',crmBookUrl+'#gid=704101002','Открыть очередь ↗'],
-  ['История контактов','Звонки, сообщения, встречи и результаты общения.',crmBookUrl+'#gid=704101003','Открыть историю ↗'],
- ];
- main.innerHTML=hero('FIVEROX · рабочий кабинет','CRM','Рабочая база Чеченской Республики.')
+ main.innerHTML=hero('FIVEROX · Чеченская Республика','Личный кабинет','Воронка CRM, рабочие заметки и журнал изменений доступны после входа.')
   +`<section id="crmInline" aria-label="Редактор CRM">
-   <div class="crm-entry"><div><h2>Воронка и карточки</h2><p>Доступ через Google для владельца и редакторов закрытой таблицы.</p><p>Если в браузере открыто несколько Google-аккаунтов, откройте CRM в приватном окне и войдите под одним аккаунтом редактора.</p></div>
-    <div class="crm-links"><a id="crmDirectLink" class="button" target="_blank" rel="noopener noreferrer" hidden>CRM в новой вкладке ↗</a><button id="crmOpen" type="button" aria-controls="crmFrame" aria-expanded="false" disabled>Открыть редактор</button></div>
+   <div class="crm-entry"><div><h2>Рабочая CRM</h2><p>Права на редактирование выдаёт администратор.</p><p>При сбое входа Google откройте кабинет в приватном окне и войдите под одним аккаунтом.</p></div>
+    <div class="crm-links"><a id="crmDirectLink" class="button" target="_blank" rel="noopener noreferrer" hidden>Личный кабинет в новой вкладке ↗</a><button id="crmOpen" type="button" aria-controls="crmFrame" aria-expanded="false" disabled>Открыть редактор</button></div>
     <p id="crmStatus" class="crm-status" role="status"></p>
    </div>
    <iframe id="crmFrame" class="crm-frame" title="Редактор карточек FIVEROX CRM" referrerpolicy="no-referrer" hidden></iframe>
   </section>`
-  +'<section class="crm-entry" aria-labelledby="crm-entry-title"><div><h2 id="crm-entry-title">Обзор в Google Таблице</h2><p>Сводка по этапам и сроки следующих контактов.</p></div><div class="crm-links">'+link(crmBookUrl,'Открыть Google Таблицу ↗')+'</div></section>'
-  +'<section class="chart-grid crm-sections" aria-label="Разделы CRM">'+sections.map(([title,description,url,label])=>
-   '<article class="chart"><h2>'+esc(title)+'</h2><p class="chart-sub">'+esc(description)+'</p><div class="crm-section-link">'+link(url,label)+'</div></article>'
-  ).join('')+'</section>';
+  +'<section class="crm-entry" aria-label="Публичный каталог"><div><h2>Публичные карточки компаний</h2><p>Услуги, контакты и опубликованные цены доступны без входа.</p></div><div class="crm-links"><a href="#leads">Смотреть карточки</a></div></section>'
+  +'<section class="crm-entry" aria-label="Рабочая таблица"><div><h2>Закрытая Google Таблица</h2><p>Для владельца и приглашённых редакторов.</p></div><div class="crm-links">'+link(crmBookUrl,'Открыть Google Таблицу ↗')+'</div></section>';
  crmWeb.mount(document.querySelector('#crmInline'));
 }
 const views={market:marketView,leads:leadsView,model:modelView,crm:crmView};
 function route(){
  const key=location.hash.slice(1);
+ if(dialog.open)dialog.close();
  if(key!=='crm')crmWeb.unmount();
  const tab=Object.hasOwn(views,key)?key:'market';
  main.dataset.view=tab;
