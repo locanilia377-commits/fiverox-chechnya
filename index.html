@@ -263,7 +263,7 @@ const crmWeb = (() => {
    timer=setTimeout(()=>{
     if(!root.isConnected)return;
     button.disabled=false;
-    status.textContent='Если редактор не загрузился, войдите через Google в аккаунт владельца и нажмите «Открыть редактор» снова.';
+    status.textContent='Если редактор не загрузился, войдите через Google под аккаунтом с правами редактора таблицы и попробуйте снова.';
    },12000);
   });
  }
@@ -556,7 +556,7 @@ function crmView(){
  ];
  main.innerHTML=hero('FIVEROX · рабочий кабинет','CRM','Рабочая база Чеченской Республики.')
   +`<section id="crmInline" aria-label="Редактор CRM">
-   <div class="crm-entry"><div><h2>Работа с карточками</h2><p>Доступ владельцу через Google.</p></div>
+   <div class="crm-entry"><div><h2>Воронка и карточки</h2><p>Доступ через Google для владельца и редакторов закрытой таблицы.</p></div>
     <div class="crm-links"><button id="crmOpen" class="button" type="button" disabled>Открыть редактор</button><a id="crmGoogleLogin" target="_blank" rel="noopener noreferrer" hidden>Войти через Google ↗</a></div>
     <p id="crmStatus" class="crm-status" role="status"></p>
    </div>
