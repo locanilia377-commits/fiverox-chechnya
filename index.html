@@ -22,9 +22,107 @@ main{padding-block:28px 42px;min-height:65vh}.hero{position:relative;overflow:hi
 @media(max-width:990px){.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.chart-grid{grid-template-columns:1fr}.chart{padding:15px}.chart-sub,.chart-foot{font-size:12px}}
 
-.auto-charts{grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0}.auto-dashboard .table-wrap{margin-top:14px}.auto-dashboard td:first-child{min-width:155px}.auto-dashboard td:nth-child(n+2):nth-child(-n+6){white-space:nowrap;font-variant-numeric:tabular-nums}.not-available{color:var(--muted);background:#f1f4f2;padding:2px 6px;border-radius:4px}.model-layout{grid-template-columns:.9fr 1.25fr}.basket-grid{display:grid;gap:9px}.basket-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(64px,.65fr) minmax(90px,1fr) auto;gap:8px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:9px}.basket-row strong{font-size:13px;align-self:center}.basket-row label{display:grid;gap:4px;font-size:11px;color:var(--muted);font-weight:650}.basket-result{align-self:center;padding-top:12px;font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}.basket-footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}.basket-footer .note{margin:0}#modelChart{max-width:none}
+.auto-charts{grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0}.model-layout{grid-template-columns:.9fr 1.25fr}.basket-grid{display:grid;gap:9px}.basket-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(64px,.65fr) minmax(90px,1fr) auto;gap:8px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:9px}.basket-row strong{font-size:13px;align-self:center}.basket-row label{display:grid;gap:4px;font-size:11px;color:var(--muted);font-weight:650}.basket-result{align-self:center;padding-top:12px;font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}.basket-footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}.basket-footer .note{margin:0}#modelChart{max-width:none}
 @media(max-width:760px){.model-layout{grid-template-columns:1fr}.basket-row{grid-template-columns:1.35fr minmax(54px,.7fr) minmax(80px,1fr)}.basket-result{grid-column:3;justify-self:end;padding:0}}
 @media(max-width:620px){.auto-charts{grid-template-columns:1fr}.basket-row{gap:5px}.basket-row label{font-size:10px}.basket-row input{padding-inline:6px}}
+
+main .hero { padding: 28px 32px; margin-bottom: 16px; }
+main .hero h1 { font-size: clamp(30px, 4.5vw, 49px); }
+main .hero p { margin-top: 9px; }
+.market-shortcuts, .data-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.market-shortcuts .button { background: var(--panel); border-radius: 999px; font-size: 13px; padding: 9px 13px; }
+.market-shortcuts .button:hover { background: #e3f3e9; }
+.market-block { scroll-margin-top: 77px; }
+.market-block:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 14px; }
+.market-block .chart-grid:has(.tile-foot details[open]) { align-items: start; }
+.market-charts { grid-template-columns: 1.4fr repeat(2, minmax(0, 1fr)); }
+.market-tile {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+ min-width: 0;
+ min-height: 326px;
+ padding: 18px;
+ border: 1px solid var(--line);
+ border-radius: 17px;
+ background: var(--panel);
+}
+.income-tile { background: #f8fdfb; border-color: #b9dbce; }
+.market-tile h3 { font-size: 20px; line-height: 1.2; letter-spacing: -.032em; }
+.tile-scope {
+ align-self: flex-start;
+ padding: 4px 8px;
+ border-radius: 6px;
+ background: #edf5f3;
+ color: #305954;
+ font-size: 11px;
+ font-weight: 750;
+}
+.tile-context { font-size: 12px; color: var(--muted); }
+.market-tile .bar-rows { gap: 2px; margin: 0; }
+.market-tile .bar-row { padding: 3px 0; }
+.market-tile .bar-track { height: 7px; }
+.market-tile .chart-big { font-size: clamp(26px, 3.5vw, 43px); }
+.market-tile .chart-legend { display: grid; font-size: 13px; }
+.data-chip { padding: 4px 8px; border-radius: 6px; background: #e9f3ef; color: #20574e; font-size: 12px; font-weight: 720; }
+.tile-foot { margin-top: auto; border-top: 1px solid var(--line); }
+.market-gap { background: #f4f7f7; border-style: dashed; }
+.year-pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.year-pair > div { display: grid; gap: 4px; padding: 11px; background: var(--panel); border-radius: 9px; }
+.year-pair span { color: var(--muted); font-size: 12px; }
+.not-available { font-size: 19px; }
+#auto-market .market-tile { min-height: 278px; }
+.disclosure > summary {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ padding: 10px 0 2px;
+ list-style: none;
+ font-size: 13px;
+}
+.disclosure > summary::-webkit-details-marker { display: none; }
+.disclosure > summary::after {
+ content: "+";
+ display: grid;
+ place-items: center;
+ flex: 0 0 25px;
+ height: 25px;
+ border-radius: 50%;
+ background: #e7f4ee;
+ font-size: 17px;
+}
+.disclosure[open] > summary { margin-bottom: 0; }
+.disclosure[open] > summary::after { content: "−"; }
+.disclosure > summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+.disclosure > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+.disclosure-body { padding-top: 9px; display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
+.source-list { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
+.evidence-groups { display: grid; gap: 8px; }
+.evidence-groups > .disclosure { padding: 0 17px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+.evidence-groups > .disclosure > summary { padding: 12px 0; font-size: 15px; }
+.evidence-groups > .disclosure > .disclosure-body { padding: 0 0 14px; }
+.evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 9px; }
+.evidence-card { display: grid; align-content: start; gap: 5px; padding: 12px; background: #f3f8f6; border-radius: 9px; overflow-wrap: anywhere; }
+.evidence-card h3 { color: var(--ink); font-size: 14px; }
+.evidence-card span, .evidence-card p { font-size: 12px; }
+.evidence-card .evidence-value { color: var(--accent); font-size: 19px; font-weight: 750; }
+.evidence-value small { font-size: 11px; font-weight: 500; }
+.model-metrics { margin-bottom: 16px; }
+.model-metrics .metric:first-child { background: #dff4eb; border-color: #b9dbce; }
+@media(max-width:990px) {
+ .market-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .income-tile { grid-column: 1 / -1; }
+ .market-tile { min-height: 0; }
+}
+@media(max-width:620px) {
+ main .hero { padding: 22px 18px; }
+ .market-charts { grid-template-columns: 1fr; }
+ #auto-market .market-tile { min-height: 0; }
+ .market-tile { padding: 15px; }
+ .model-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .model-metrics .metric:first-child { grid-column: 1 / -1; }
+}
 </style>
 
 </head>
@@ -62,13 +160,14 @@ const table=(heads,body)=>'<div class="table-wrap"><table><thead><tr>'+heads.map
 const sheet=link(sheetUrl,'Открыть Google Таблицу ↗');
 document.querySelector('#sheetTop').href=sheetUrl;
 document.querySelector('#sheetFoot').href=sheetUrl;
-const marketTable=rows=>table(['Показатель','Территория','Период','Значение','Источник и оговорка'],
- tr(rows,r=>[esc(r[1]),esc(r[0]),esc(r[2]),'<strong>'+fmt(r[3])+'</strong><br>'+esc(r[4]),esc(r[6])+' '+link(r[7],r[5]+' ↗')]));
+const disclosure=(label,body)=>'<details class="disclosure"><summary>'+esc(label)+'</summary><div class="disclosure-body">'+body+'</div></details>';
+const marketEvidence=rows=>'<div class="evidence-grid">'+rows.map(r=>'<article class="evidence-card"><span>'+esc(r[0])+' · '+esc(r[2])+'</span><h3>'+esc(r[1])+'</h3><p class="evidence-value">'+fmt(r[3])+' <small>'+esc(r[4])+'</small></p><p>'+esc(r[6])+'</p><p>'+(link(r[7],r[5]+' ↗')||esc(r[5]))+'</p></article>').join('')+'</div>';
 const regionRows=market.filter(r=>r[0].startsWith('Чеченская Республика'));
 const lookup=(label,period)=>regionRows.find(r=>r[1]===label&&(!period||r[2]===period));
 const source=(r,label='Источник ↗')=>r?link(r[7],label):'';
 const pct=(a,b)=>b?nf.format(100*a/b)+'%':'0%';
-const trend=(before,after)=>fmt(after-before)+' · '+(after>before?'+':'')+nf.format(100*(after-before)/before)+'%';
+const signed=(n,suffix='')=>(n>0?'+':'')+fmt(n)+suffix;
+const change=(before,after)=>signed(100*(after-before)/before,'%');
 const scale=(v,m)=>m?100*v/m:0;
 const palette={teal:'teal',blue:'blue',gold:'gold',gray:'gray',mint:'mint'};
 function chart(title,sub,body,foot=''){
@@ -85,6 +184,8 @@ const serviceProfiles=[['Оклейка','Оклейка','teal'],['Тониро
 function legend(rows){
  return '<div class="chart-legend">'+rows.map(r=>'<span><i class="'+(palette[r.color]??'teal')+'" aria-hidden="true"></i>'+esc(r.label)+'</span>').join('')+'</div>';
 }
+const chip=text=>'<span class="data-chip">'+esc(text)+'</span>';
+const tile=(title,scope,body,footer,className='')=>'<article class="chart market-tile '+className+'"><p class="tile-scope">'+esc(scope)+'</p><h3>'+esc(title)+'</h3>'+body+'<div class="tile-foot">'+footer+'</div></article>';
 function marketCharts(){
  const msp=lookup('Количество субъектов МСП по реестру ФНС');
  const subjects=[lookup('ИП в реестре МСП'),lookup('Юрлица в реестре МСП')];
@@ -95,14 +196,14 @@ function marketCharts(){
  const city=market.find(r=>r[0]==='Грозный'&&r[1]==='Постоянное население'&&r[2]==='01.01.2025');
  const outer=market.find(r=>r[0]==='Республика без Грозного'&&r[1]==='Постоянное население'&&r[2]===city[2]);
  const total=city[3]+outer[3];
- return '<section class="dashboard-block" aria-label="Графики рынка"><div class="section-head"><div><div class="eyebrow">Рыночные показатели</div><h2>Рынок в цифрах</h2></div><p>Чеченская Республика · источники рядом с графиками</p></div><div class="chart-grid">'
- +chart('Доход на человека','₽ на человека в месяц · одна шкала для обоих рядов',barRows(income,n=>money.format(n)),[
-  'Изменение среднего: '+esc(trend(mean[0][3],mean[1][3])),
-  'Изменение медианы: '+esc(trend(median[0][3],median[1][3])),
-  source(mean[1],'Чеченстат · средний ↗')+' · '+source(median[1],data.incomeSourceLabel+' ↗')+'<br>'+link(data.medianSource.catalog,'Каталог Росстата ↗')+(data.medianSource.verified?'':' · XLSX за 2025 год не прочитан напрямую')
- ].join('<br>'))
- +chart('Население','Республика на '+city[2],'<div class="chart-big">'+fmt(total)+'</div><div class="stack-track" aria-hidden="true"><i class="teal" style="width:'+scale(city[3],total)+'%"></i><i class="blue" style="width:'+scale(outer[3],total)+'%"></i></div>'+legend([{label:'Грозный · '+fmt(city[3])+' ('+pct(city[3],total)+')',color:'teal'},{label:'Вне Грозного · '+fmt(outer[3]),color:'blue'}]),source(city,'Чеченстат ↗'))
- +chart('Субъекты МСП','Реестр ФНС на '+msp[2],'<div class="chart-big">'+fmt(msp[3])+'</div>'+barRows(subjects.map((r,i)=>({label:i?'Юрлица':'ИП',value:r[3],color:i?'blue':'teal'}))),source(msp,'Единый реестр МСП ↗'))
+ const incomeSources='<ul class="source-list"><li>'+source(mean[1],'Чеченстат · средний доход ↗')+'</li><li>'+source(median[0],'Росстат · медиана 2024 ↗')+'</li><li>'+source(median[1],data.incomeSourceLabel+' 2025 ↗')+'</li><li>'+link(data.medianSource.catalog,'Каталог Росстата ↗')+'</li></ul>'
+  +(data.medianSource.verified?'':'<p>Значение за 2025 год сверено по Росчарту. XLSX Росстата пока недоступен для прямой сверки.</p>');
+ return '<section class="dashboard-block market-block" id="market-indicators" tabindex="-1" aria-labelledby="market-indicators-title"><div class="section-head"><h2 id="market-indicators-title">Рынок в цифрах</h2><p>Чеченская Республика</p></div><div class="chart-grid market-charts">'
+ +tile('Доход на человека','₽ в месяц · единая шкала',barRows(income,n=>money.format(n))
+   +'<div class="data-chips">'+chip('Средний '+change(mean[0][3],mean[1][3]))+chip('Медиана '+change(median[0][3],median[1][3]))+'</div>'
+   +(data.medianSource.verified?'':'<p class="tile-context">Медиана 2025 · по Росчарту</p>'),disclosure('Источники доходов',incomeSources),'income-tile')
+ +tile('Население','На '+city[2],'<div class="chart-big">'+fmt(total)+'</div><div class="stack-track" aria-hidden="true"><i class="teal" style="width:'+scale(city[3],total)+'%"></i><i class="blue" style="width:'+scale(outer[3],total)+'%"></i></div>'+legend([{label:'Грозный · '+fmt(city[3])+' ('+pct(city[3],total)+')',color:'teal'},{label:'Вне Грозного · '+fmt(outer[3]),color:'blue'}]),disclosure('Источник населения','<p>'+source(city,'Чеченстат ↗')+'</p><p>'+esc(city[6])+'</p>'))
+ +tile('Субъекты МСП','Реестр ФНС · '+msp[2],'<div class="chart-big">'+fmt(msp[3])+'</div>'+barRows(subjects.map((r,i)=>({label:i?'Юрлица':'ИП',value:r[3],color:i?'blue':'teal'}))),disclosure('Источник данных МСП','<p>'+source(msp,'Единый реестр МСП ↗')+'</p><p>'+esc(msp[6])+'</p>'))
  +'</div></section>';
 }
 function compareAuto(years){
@@ -111,24 +212,17 @@ function compareAuto(years){
  return {delta:b-a,rate:100*(b-a)/a,total:a+b};
 }
 function autoView(){
- const rows=data.autoSeries;
- const available=rows.filter(r=>r.chart&&compareAuto(r.years));
- const chartBody=available.map(r=>{
-   const calc=compareAuto(r.years);
-   return chart(r.label,r.territory+' · '+r.measure,barRows(r.years.map((value,i)=>({label:String(2024+i),value,color:i?'blue':'teal'}))),
-    esc(trend(...r.years))+' · за два года '+fmt(calc.total)+'<br>'+link(r.url,r.source+' ↗'));
- }).join('');
- const signed=(n,suffix='')=>(n>0?'+':'')+fmt(n)+suffix;
- const head=['Территория и сегмент','2024','2025','Изменение','К 2024 году','За два года','Источник'];
- const body=tr(rows,r=>{
+ const cards=data.autoSeries.map(r=>{
   const c=compareAuto(r.years);
-  return ['<strong>'+esc(r.territory)+'</strong><br>'+esc(r.label),...r.years.map(y=>y==null?'<span class="not-available">н/д</span>':fmt(y)),c?signed(c.delta):'—',c?signed(c.rate,'%'):'—',c?fmt(c.total):'—',link(r.url,r.source+' ↗')+'<br>'+esc(r.note)];
- });
- const missing=rows.find(r=>r.key==='used-chechnya');
- const partial=compareAuto(missing.years)?'':'<details class="note"><summary>Что известно по Чечне за неполные периоды</summary><p>'+data.partialUsed.map(r=>esc(r.label)+' · '+esc(r.value)+' автомобилей · '+link(r.url,'АВТОСТАТ ↗')).join('<br>')+'</p><p>Периоды разной длины. Они не входят в расчёт годового изменения.</p></details>';
- const note=compareAuto(missing.years)?'Новые и подержанные легковые показаны отдельно. Определение показателя указано у каждого ряда.':'По Чеченской Республике открытый сопоставимый ряд за два года найден для новых легковых. Региональные значения по машинам с пробегом за 2024–2025 годы не подтверждены. Ряд СКФО показан отдельно для контекста.';
- return '<section class="panel auto-dashboard" id="auto-market"><div class="section-head"><div><div class="eyebrow">2024 и 2025 · полные годы</div><h2>Автомобильный рынок</h2></div><p>Новые и подержанные легковые · отдельные ряды</p></div><p class="note notice">'+esc(note)+'</p><div class="chart-grid auto-charts">'+chartBody+'</div>'
- +table(head,body)+partial+'<p class="note">Изменение рассчитано к 2024 году. Итог за два года относится только к своему ряду. Автопарк приведён ниже отдельно от продаж и перерегистраций.</p></section>';
+  const evidence='<p>'+link(r.url,r.source+' ↗')+'</p><p>'+esc(r.note)+'</p>';
+  if(c){
+   const bars=barRows(r.years.map((value,i)=>({label:String(2024+i),value,color:i?'blue':'teal'})));
+   return tile(r.label,r.territory,'<p class="tile-context">'+esc(r.measure)+'</p>'+bars+'<div class="data-chips">'+chip(signed(c.rate,'%')+' к 2024')+chip(signed(c.delta)+' авто')+'</div><p class="tile-context">За два года <strong>'+fmt(c.total)+'</strong></p>',disclosure('Источник и охват',evidence));
+  }
+  const partial='<ul class="source-list">'+data.partialUsed.map(p=>'<li><strong>'+esc(p.value)+'</strong> · '+esc(p.label)+' · '+link(p.url,'АВТОСТАТ ↗')+'</li>').join('')+'</ul><p>Периоды разной длины, годовая динамика не рассчитывается.</p>';
+  return '<article class="market-tile market-gap"><p class="tile-scope">'+esc(r.territory)+'</p><h3>'+esc(r.label)+'</h3><div class="year-pair">'+r.years.map((value,i)=>'<div><span>'+String(2024+i)+'</span><strong class="not-available">'+(value==null?'н/д':fmt(value))+'</strong></div>').join('')+'</div><p class="tile-context">Годовой ряд не подтверждён</p><div class="tile-foot">'+disclosure('Что известно по Чечне за неполные периоды',partial+evidence)+'</div></article>';
+ }).join('');
+ return '<section class="dashboard-block market-block" id="auto-market" tabindex="-1" aria-labelledby="auto-market-title"><div class="section-head"><h2 id="auto-market-title">Автомобильный рынок</h2><p>2024 и 2025 · полные годы</p></div><div class="chart-grid">'+cards+'</div></section>';
 }
 function leadCharts(){
  const geo=['Грозный','Вне Грозного'].map(g=>({name:g,rows:leads.filter(l=>l.geo===g)}));
@@ -176,17 +270,18 @@ function modelCharts(target,margin,basket,unitRevenue){
 }
 
 function marketView(){
- const pick=(label,period,geo)=>market.find(r=>r[1]===label&&r[2]===period&&r[0].startsWith(geo));
- const pop=pick('Постоянное население','01.01.2025','Чеченская'),city=pick('Постоянное население','01.01.2025','Грозный');
- const income=pick('Среднедушевой денежный доход в месяц','2025','Чеченская'),park=pick('Парк легковых автомобилей','конец 2024','Чеченская');
- const keyMetrics=[[pop,'Население республики','На 1 января 2025'],[city,'Население Грозного','На 1 января 2025'],[income,'Доход на человека','Среднемесячный, 2025'],[park,'Легковые автомобили','Парк на конец 2024']];
  const auto=market.filter(r=>/автомобил|автовлад/.test(r[1]));
  const people=market.filter(r=>!auto.includes(r));
- main.innerHTML=hero('Рынок и доходы · Чеченская Республика','Масштаб и покупательский контекст','Население, доходы и автомобильный рынок. Грозный показан отдельно там, где доступна муниципальная статистика.')
- +'<section class="metrics" aria-label="Ключевые показатели">'+keyMetrics.map(([r,l,n])=>metric(l,r?fmt(r[3])+(r===income?' ₽':''):'н/д',n)).join('')+'</section>'+marketCharts()
- +'<section class="panel"><div class="section-head"><div><div class="eyebrow">Покупательский контекст</div><h2>Доходы, достаток и МСП</h2></div><p>Период и территория указаны для каждого ряда</p></div>'+marketTable(people.filter(r=>/доход|благополуч|достатк|Количество субъектов МСП/i.test(r[1])))
- +'<details class="note"><summary>Остальные показатели</summary>'+marketTable(people.filter(r=>!/доход|благополуч|достатк|Количество субъектов МСП/i.test(r[1])))+'</details></section>'
- +autoView()+'<section class="panel"><h2 class="subhead">Автопарк и дополнительные показатели</h2>'+marketTable(auto.filter(r=>!/Продажи|Изменение продаж/.test(r[1])))+'</section>';
+ const groups=[
+  ['Доходы, достаток и рынок труда',people.filter(r=>/доход|благополуч|достатк|зарплат|безработ/i.test(r[1]))],
+  ['Население, бизнес и торговля',people.filter(r=>!/доход|благополуч|достатк|зарплат|безработ/i.test(r[1]))],
+  ['Автопарк и данные по Грозному',auto.filter(r=>!/Продажи|Изменение продаж/.test(r[1])||r[0]==='Грозный')],
+ ];
+ const park=lookup('Парк легковых автомобилей','конец 2024');
+ main.innerHTML=hero('Чеченская Республика · FIVEROX','Масштаб и покупательский контекст','Доходы, бизнес и автомобильный рынок региона.')
+ +'<div class="market-shortcuts" role="group" aria-label="Разделы обзора"><button class="button" data-jump="market-indicators" type="button">Доходы и МСП ↓</button><button class="button" data-jump="auto-market" type="button">Авторынок ↓</button><button class="button" data-jump="market-evidence" type="button">Данные и источники ↓</button></div>'
+ +marketCharts()+autoView()+'<section class="dashboard-block market-block" id="market-evidence" tabindex="-1" aria-labelledby="market-evidence-title"><div class="section-head"><h2 id="market-evidence-title">Данные и источники</h2><p>Автопарк на конец 2024 · '+fmt(park[3])+' легковых</p></div><div class="evidence-groups">'
+ +groups.map(([label,rows])=>disclosure(label,marketEvidence(rows))).join('')+'</div></section>';
 }
 const state={query:'',geo:'',city:'',profile:'confirmed',source:'',price:'',sort:'default',limit:24};
 const labels={confirmed:'Подтверждённые',all:'Все точки','Оклейка':'Оклейка','Тонировка':'Тонировка','Оклейка + тонировка':'Обе услуги','Требует проверки':'Кандидаты'};
@@ -224,7 +319,7 @@ function refresh(){
 }
 function leadsView(){
  const counts=summary.byProfile;
- main.innerHTML=hero('Лиды и конкуренция · Проверка 07.11.2026','Оклейка и тонировка','Рабочая база Грозного и других населённых пунктов Чеченской Республики. В карточках есть контакты, доказательства услуг и опубликованные позиции прайсов.')
+ main.innerHTML=hero('Лиды и конкуренция · Проверка 07.11.2026','Оклейка и тонировка','Точки Чеченской Республики. Контакты, услуги и прайсы — в карточках.')
  +'<section class="metrics">'+metric('Точки в базе',summary.total,'Объединены совпадения по адресу')+metric('Подтверждённые',summary.confirmed,'Оклейка или тонировка')+metric('Обе услуги',counts['Оклейка + тонировка']??0,'Подтверждены раздельно')+metric('Кандидаты',summary.candidates,'Требуется подтверждение услуг')+'</section>'+leadCharts()
  +'<section class="panel" id="leadFilters"><div class="section-head"><div><div class="eyebrow">Рабочий список</div><h2>Найти точку</h2></div><p>'+sheet+'</p></div><div class="filters">'
  +'<label>Поиск<input id="query" type="search" placeholder="Название, адрес или телефон" value="'+esc(state.query)+'"></label>'
@@ -263,11 +358,12 @@ function modelView(){
  const input=(id,label,min,max,step,value)=>'<label>'+esc(label)+'<input id="'+id+'" type="number" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
  const basketInputs=sale.basket.map((r,i)=>'<div class="basket-row"><strong>'+esc(r.label)+'</strong>'+input('quantity'+i,'Рулонов',0,1000,1,r.quantity)+input('price'+i,'Цена за рулон, ₽',0,10000000,0.01,r.price)+'<span class="basket-result" id="basketCost'+i+'"></span></div>').join('');
  main.innerHTML=hero('Модель продаж · FIVEROX','От подключений к обороту','Подставьте количество точек, состав корзины и маржу. Введённые числа сохраняются в этом браузере.')
+  +'<section class="metrics model-metrics" id="modelMetrics" aria-label="Результаты за месяц" aria-live="polite"></section>'
   +'<div class="split model-layout"><section class="panel"><h2 class="subhead">Параметры</h2><div class="inputs">'
   +input('outlets','Подключённые точки',0,10000,1,sale.outlets)+input('target','Цель по точкам',1,10000,1,sale.target)+input('margin','Маржа, %',0,100,0.1,sale.margin)
   +'</div><button class="button" id="example" type="button">Пример на 10 точек</button><p id="goalLabel" class="note"></p><progress id="goal" class="progress" aria-label="Прогресс подключения" value="0" max="100"></progress></section>'
   +'<section class="panel"><h2 class="subhead">Корзина одной точки</h2><div class="basket-grid">'+basketInputs+'</div><div class="basket-footer"><p id="basketTotal" class="note"></p><button class="button" id="resetBasket" type="button">Сбросить корзину</button></div></section></div>'
-  +'<section class="metrics model-metrics" id="modelMetrics" aria-live="polite"></section><section id="modelChart" class="dashboard-block" aria-label="Графики модели продаж"></section><p class="note notice">Сумма по марже рассчитывается до прочих расходов.</p>';
+  +'<section id="modelChart" class="dashboard-block" aria-label="Графики модели продаж"></section><p class="note notice">Сумма по марже рассчитывается до прочих расходов.</p>';
  const field=id=>document.querySelector('#'+id);
  function number(id,min,max,whole=false){
   const v=field(id).valueAsNumber;
@@ -313,10 +409,18 @@ const views={market:marketView,leads:leadsView,model:modelView};
 function route(){
  const key=location.hash.slice(1);
  const tab=Object.hasOwn(views,key)?key:'market';
+ main.dataset.view=tab;
  for(const a of document.querySelectorAll('.nav a'))if(a.hash==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
  views[tab]();
 }
 main.addEventListener('click',e=>{
+ const jump=e.target.closest('button[data-jump]');
+ if(jump){
+  const section=document.getElementById(jump.dataset.jump);
+  section.focus({preventScroll:true});
+  section.scrollIntoView({block:'start'});
+  return;
+ }
  const lead=e.target.closest('button[data-lead]');
  if(lead){openLead(lead.dataset.lead);return;}
  const filter=e.target.closest('button[data-chart-filter]');
