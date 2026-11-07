@@ -117,6 +117,13 @@ main .hero p { margin-top: 9px; }
 .lead-overview { padding: 0 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); margin-bottom: 12px; }
 .lead-overview > summary { padding: 9px 0; font-size: 14px; }
 .lead-overview .dashboard-block { margin: 10px 0 16px; }
+.crm-entry { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 16px; margin-bottom: 12px; background: #dff4eb; border: 1px solid #b9dbce; border-radius: 13px; }
+.crm-entry h2 { font-size: 18px; letter-spacing: -.025em; }
+.crm-entry p, .lead-crm-link span { color: var(--muted); font-size: 12px; }
+.crm-links { display: flex; flex-wrap: wrap; gap: 7px; }
+.crm-links a { padding: 7px 10px; border: 1px solid #b9dbce; border-radius: 8px; background: var(--panel); font-size: 12px; font-weight: 720; text-decoration: none; }
+.crm-links a:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
+.lead-crm-link { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 9px; margin-top: 10px; font-size: 13px; }
 #leadFilters { padding: 16px; }
 #leadFilters .section-head { margin-bottom: 10px; }
 #leadFilters .section-head .eyebrow { margin-bottom: 5px; }
@@ -199,6 +206,8 @@ const profilePill=l=>'<span class="pill '+(l.status==='Кандидат'?'pendin
 const tr=(a,fn)=>a.map(r=>'<tr>'+fn(r).map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('');
 const table=(heads,body)=>'<div class="table-wrap"><table><thead><tr>'+heads.map(x=>'<th scope="col">'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>';
 const sheet=link(sheetUrl,'Открыть Google Таблицу ↗');
+const crmBookUrl='https://docs.google.com/spreadsheets/d/1g2-j42pdbResuAA55GEGUtDvvfgKgslkcKMRTB-_fts/edit';
+const crmCardsUrl=crmBookUrl+'#gid=704101001';
 document.querySelector('#sheetTop').href=sheetUrl;
 document.querySelector('#sheetFoot').href=sheetUrl;
 const disclosure=(label,body)=>'<details class="disclosure"><summary>'+esc(label)+'</summary><div class="disclosure-body">'+body+'</div></details>';
@@ -367,6 +376,7 @@ function leadsView(){
  main.innerHTML=hero('Лиды и конкуренция · Проверка 07.11.2026','Оклейка и тонировка','Точки Чеченской Республики. Контакты, услуги и прайсы — в карточках.')
  +'<section class="metrics lead-metrics" aria-label="Сводка базы">'+metric('Точки в базе',summary.total)+metric('Подтверждённые',summary.confirmed)+metric('Обе услуги',counts['Оклейка + тонировка']??0)+metric('Кандидаты',summary.candidates)+'</section>'
  +'<details class="disclosure lead-overview" id="lead-overview"'+(leadOverviewOpen?' open':'')+'><summary>Графики конкуренции</summary>'+leadCharts()+'</details>'
+ +'<section class="crm-entry" aria-labelledby="crm-entry-title"><div><h2 id="crm-entry-title">CRM для менеджера</h2><p>Карточки, воронка и следующие контакты · вход владельца через Google</p></div><div class="crm-links">'+link(crmBookUrl,'Открыть CRM ↗')+link(crmBookUrl+'#gid=704101002','Очередь ↗')+'</div></section>'
  +'<section class="panel" id="leadFilters"><div class="section-head"><div><div class="eyebrow">Рабочий список</div><h2>Найти точку</h2></div><p>'+sheet+'</p></div><div class="filters">'
  +'<label>Поиск<input id="query" type="search" placeholder="Название, адрес или телефон" value="'+esc(state.query)+'"></label>'
  +select('geo','Территория',[['','Вся республика'],['Грозный','Грозный'],['Вне Грозного','Вне Грозного']])
@@ -398,6 +408,7 @@ function openLead(id){
    +(p.description?'<p>'+esc(p.description)+'</p>':'')+'<p class="lead-price-meta">'+esc(p.type)+(p.updated?' · '+esc(p.updated):'')+'</p><p class="lead-price-links">'+link(p.url,p.source+' ↗')+(p.alternativeUrl?link(p.alternativeUrl,'Дубль источника ↗'):'')+'</p></article>';
  }).join('')+'</div>':'<p class="note">Позиции по плёнкам в просмотренных прайсах не найдены.</p>';
  document.querySelector('#dialogContent').innerHTML='<div class="lead-dialog-header"><div class="eyebrow">Карточка '+esc(l.id)+'</div><h2 id="dialogTitle">'+esc(l.name)+'</h2><p>'+esc(l.city)+' · '+esc(l.address)+'</p><p class="pills">'+profilePill(l)+'</p></div>'
+ +'<p class="lead-crm-link">'+link(crmCardsUrl,'Перейти к карточкам CRM ↗')+' <span>Вход через Google · поиск по названию или ID</span></p>'
  +'<section class="dialog-section"><h3>Контакты</h3>'+(contacts.length?'<ul class="lead-contact-list">'+contacts.map(contact=>'<li>'+contact+'</li>').join('')+'</ul>':'<p class="note">Контакты в просмотренных источниках не указаны.</p>')+(l.hours?'<p>'+esc(l.hours)+'</p>':'')+'<p>'+sources+'</p>'
  +l.ratings.filter(x=>x.rating!=null).map(x=>'<p>'+esc(x.source)+' · '+fmt(x.rating)+' / 5'+(x.reviews!=null?' · отзывов '+fmt(x.reviews):'')+'</p>').join('')+'</section>'
  +'<section class="dialog-section"><h3>Прайс</h3>'+prices+(l.prices.length?'<p class="note">Сортировка учитывает опубликованные суммы. Дата в позиции — из прайса.</p>':'')+'</section>'
