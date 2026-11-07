@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<style>
+:root{font:14px system-ui,sans-serif;color:#14282a;background:#edf4f1;--green:#006760;--line:#cdded7}
+*{box-sizing:border-box}body{margin:0;padding:12px}h1,h2,p{margin:0}h1{font-size:22px}h2{font-size:19px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.65fr);gap:12px}
+.workspace.board-view{grid-template-columns:minmax(0,1fr)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+label{display:grid;gap:5px;min-width:0;color:#395653;font-size:12px;font-weight:650}
+input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-width:0;border:1px solid #bcd0c8;border-radius:8px;background:white;padding:8px;color:#14282a}
+textarea{resize:vertical}button{cursor:pointer;border:1px solid #bcd0c8;background:#eef8f3;color:var(--green);border-radius:8px;padding:8px 10px;font-weight:700}
+button.primary{background:var(--green);color:white;border-color:var(--green)}button:disabled{opacity:.65;cursor:wait}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.filters,.editor,.activity,.history{display:grid;gap:9px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.meta,#result,#status{font-size:12px;color:#496763;overflow-wrap:anywhere}#status{min-height:1.6em;margin-top:8px}#status.error{color:#a52324}
+a{color:var(--green);overflow-wrap:anywhere}.record{display:grid;gap:3px;width:100%;text-align:left;background:#fff}
+.record[aria-current]{background:#def2e8;border-color:#94c6b3}#list{display:grid;gap:5px;max-height:380px;overflow:auto;padding:3px}
+header{display:grid;gap:5px;margin-bottom:10px}.record span{font-size:11px;color:#48645d}
+#editor{margin-top:10px}#recordHistory{padding-top:10px;border-top:1px solid var(--line);margin-top:12px}
+.history-entry{border-left:2px solid #b9d8ca;padding-left:8px;overflow-wrap:anywhere}summary{cursor:pointer;color:var(--green);font-weight:700}details[open] summary{margin-bottom:8px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.views{display:flex;gap:5px}.views [aria-pressed="true"]{background:var(--green);border-color:var(--green);color:white}
+#boardView{min-width:0}
+#boardStatus{margin-top:4px;min-height:1.4em}.error{color:#a52324}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);gap:8px;overflow-x:auto;padding:4px 3px 10px}
+.column{display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;height:238px;padding:7px;background:#f3f8f5;border:1px solid var(--line);border-radius:10px}
+.column.is-target{background:#e4f4eb;border-color:var(--green);outline:2px solid var(--green);outline-offset:-2px}
+.column h3{min-height:51px;margin:0;font-size:12px;line-height:17px;overflow-wrap:anywhere}
+.count{float:right;margin-left:4px;border-radius:15px;background:#dcebe4;padding:0 6px;color:#274d44;line-height:15px}
+.column-list{display:grid;align-content:start;gap:5px;overflow-y:auto;padding:3px}
+.column .record{overflow-wrap:anywhere;padding:6px}.column .record[draggable="true"]{cursor:grab;user-select:none}.column .record[draggable="true"]:active{cursor:grabbing}.record.dragging{opacity:.48}
+.access-panel{margin-bottom:12px}.access-panel summary{font-size:15px}
+.access-form{display:grid;gap:8px;max-width:430px;margin-top:9px}
+.access-actions{display:flex;flex-wrap:wrap;gap:6px}
+.access-list{display:grid;gap:5px;margin-top:10px;padding-left:20px;overflow-wrap:anywhere}
+#recordAudit{padding-top:10px;border-top:1px solid var(--line);margin-top:12px}
+.audit-entry{display:grid;gap:5px}.audit-entry ul{margin:0;padding-left:18px}
+.audit-entry li{white-space:pre-wrap;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+@media(max-width:560px){.workspace{grid-template-columns:minmax(0,1fr)}#list{max-height:150px}.panel{padding:10px}.board{grid-auto-columns:175px}}
+</style>
+<title>FIVEROX CRM</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+</head>
+<body>
+<p id="frameGate" class="meta" hidden>Откройте CRM на сайте FIVEROX или в отдельной вкладке.</p>
+<details id="signInPanel" class="panel access-panel" hidden>
+  <summary>Войти в личный кабинет</summary>
+  <p class="meta">Рабочие карточки открываются после входа с доступом от администратора.</p>
+  <div id="emailSignIn" hidden>
+    <form id="emailStart" class="access-form">
+      <p class="meta">Введите адрес, на который вам выдали доступ.</p>
+      <label>Электронная почта<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+      <div><button type="submit" class="primary">Получить код</button></div>
+    </form>
+    <form id="emailVerify" class="access-form" hidden>
+      <p id="emailDestination" class="meta"></p>
+      <label>Код из письма<input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required></label>
+      <div class="access-actions">
+        <button type="submit" class="primary">Войти по коду</button>
+        <button type="button" id="resendEmail">Отправить код ещё раз</button>
+        <button type="button" id="changeEmail">Другой адрес</button>
+      </div>
+    </form>
+  </div>
+  <div id="providerSignIn" class="access-form" hidden>
+    <div class="access-actions"><button type="button" class="primary" id="beginYandex">Войти через Яндекс ID</button></div>
+    <a id="yandexSignIn" target="_top" rel="noreferrer" hidden>Продолжить в Яндекс ID ↗</a>
+  </div>
+  <p id="signInStatus" class="meta" role="status"></p>
+</details>
+<section id="signedInPanel" class="panel access-panel" hidden>
+  <div class="toolbar"><p class="meta" id="identityLabel"></p><button type="button" id="signOut">Выйти</button></div>
+</section>
+<details id="adminPanel" class="panel access-panel" hidden>
+  <summary>Управление доступом</summary>
+  <p class="meta">Приглашайте редакторов в настройках закрытой Google Таблицы CRM.</p>
+  <div id="yandexAccess" hidden>
+    <form id="accessEditor" class="access-form">
+      <label>Яндекс ID<input name="account" type="text" autocomplete="off" placeholder="yandex:123456" pattern="yandex:[0-9]+" maxlength="80" required></label>
+      <label>Права<select name="role"><option value="viewer">Читатель</option><option value="editor">Редактор</option><option value="">Отозвать доступ</option></select></label>
+      <div><button type="submit" class="primary">Сохранить права</button></div>
+    </form>
+    <p id="adminStatus" class="meta" role="status"></p>
+    <ul id="accessList" class="access-list"></ul>
+  </div>
+</details>
+<main class="workspace board-view" id="workspace" hidden>
+  <section class="panel filters" aria-label="Лиды и фильтры">
+    <div class="toolbar">
+      <h1>Воронка CRM</h1>
+      <div class="views" role="group" aria-label="Вид карточек">
+        <button type="button" id="showBoard" aria-pressed="true">Воронка</button>
+        <button type="button" id="showList" aria-pressed="false">Список</button>
+      </div>
+    </div>
+    <label>Поиск<input id="search" type="search" placeholder="Компания, город или ID"></label>
+    <div class="grid">
+      <label>Этап<select id="filterStage"><option value="">Все</option></select></label>
+      <label>Контакт<select id="filterDue"><option value="">Все</option><option value="late">Просрочено</option><option value="today">Сегодня</option><option value="planned">Запланировано</option><option value="none">Без даты</option></select></label>
+    </div>
+    <p id="result" aria-live="polite">Загружаю базу…</p>
+    <div id="boardView">
+      <p id="boardHint" class="meta"></p>
+      <p id="boardStatus" class="meta" role="status"></p>
+      <div id="board" class="board" tabindex="0" aria-label="Этапы воронки. Прокручивайте вправо, чтобы увидеть остальные."></div>
+    </div>
+    <div id="list" hidden></div>
+  </section>
+  <section class="panel" id="recordPanel" aria-label="Карточка CRM" hidden>
+    <header><h2 id="title" tabindex="-1">Выберите лид</h2><p id="meta" class="meta"></p><p id="contacts" class="meta"></p><p id="links" class="meta"></p></header>
+    <button type="button" id="reloadRecord" hidden>Обновить карточку</button>
+    <p id="status" role="status"></p>
+    <form id="editor" class="editor" hidden>
+      <div class="grid"><label>Этап<select name="stage" required></select></label><label>Ответственный<input name="manager" maxlength="254"></label></div>
+      <div class="grid"><label>Следующий контакт<input name="due" type="date"></label><label>Последний контакт<input name="last" type="date"></label></div>
+      <label>Следующий шаг<input name="next" maxlength="500"></label>
+      <label>Заметка менеджера<textarea name="note" rows="2" maxlength="3000"></textarea></label>
+      <div class="grid"><label>Оценка сделки, ₽<input name="amount" type="number" min="0" step="0.01" max="1000000000000"></label><label>Причина отказа<input name="reason" maxlength="500"></label></div>
+      <div id="saveCard"><button type="submit" class="primary">Сохранить карточку</button></div>
+    </form>
+    <details id="recordHistory" hidden><summary>История контактов</summary>
+      <form id="activity" class="activity">
+        <label>Действие<select name="action" required></select></label>
+        <label>Результат<textarea name="comment" rows="2" maxlength="3000"></textarea></label>
+        <div><button type="submit">Добавить в историю</button></div>
+      </form>
+      <div id="history" class="history"></div>
+    </details>
+    <details id="recordAudit" hidden><summary>Журнал изменений</summary>
+      <div id="audit" class="history"></div>
+    </details>
+  </section>
+</main>
+<script>
+(()=>{
+'use strict';
+  if(window.top!==window.self){
+    const gate=document.getElementById('frameGate');
+    gate.textContent='Откройте CRM в отдельной вкладке.';
+    gate.hidden=false;
+    return;
+  }
+const byId=id=>document.getElementById(id);
+const form=byId('editor'), activity=byId('activity'), reloadRecord=byId('reloadRecord');
+const accessEditor=byId('accessEditor');
+const emailStart=byId('emailStart'), emailVerify=byId('emailVerify'), resendEmail=byId('resendEmail');
+const roleLabels={admin:'Администратор',editor:'Редактор',viewer:'Читатель'};
+const sessionKey='fiverox-chechnya-crm-session:v1';
+const yandexProofKey='fiverox-chechnya-yandex-proof:v1';
+const abandoned=new Error('Запрос отменён.');
+const legacyAccess=false;
+const loginOptions={"yandex":false,"email":true};
+const initialSession=null;
+const yandexCallback=null;
+const fields=['stage','manager','due','next','last','note','amount','reason'];
+let db, current, selectedId, busy=false, loading=false, refreshRequired=false, requestId=0, dragged, targetColumn;
+let session=null, viewId=0;
+let emailProof='', emailAddress='', emailResendTimer, emailResendUntil=0;
+const option=(value,label=value)=>new Option(label,value);
+async function call(name,...args){
+  const unavailable='Не удалось связаться с CRM. Попробуйте снова.';
+  let reply;
+  try{
+    const response=await fetch("https://script.google.com/macros/s/AKfycbw3IeGDIXaMep3CvIOVy_nKedX8MyVIGoU6PQWv-v491HQ8bvS8vQsNxJoAQL4jLSdo/exec",{
+      method:'POST',
+      mode:'cors',
+      credentials:'omit',
+      referrerPolicy:'no-referrer',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify({method:name,args}),
+    });
+    if(!response.ok)throw new Error(unavailable);
+    reply=await response.json();
+  }catch(error){
+    throw new Error(unavailable);
+  }
+  if(reply?.ok===true)return reply.result;
+  if(reply?.ok===false&&typeof reply.error==='string')throw new Error(reply.error);
+  throw new Error(unavailable);
+}
+const canEdit=()=>session?.role==='admin'||session?.role==='editor';
+function errorCode(error){return error?.message?.match(/CRM_(?:AUTH_REQUIRED|FORBIDDEN)/)?.[0];}
+function errorText(error){return String(error?.message||'Проверьте подключение и попробуйте снова.').replace(/^(?:Error:\s*)?CRM_[A-Z_]+:\s*/,'');}
+function storage(){return null;}
+function accessStatus(id,message='',error=false){
+  const node=byId(id);
+  node.textContent=message;
+  node.classList.toggle('error',error);
+}
+async function crmCall(name,...args){
+  const identity=session, view=viewId;
+  try{
+    const result=await call(name,identity?.token??'',...args);
+    if(view!==viewId)throw abandoned;
+    return result;
+  }catch(error){
+    if(view!==viewId)throw abandoned;
+    if(identity&&errorCode(error)==='CRM_AUTH_REQUIRED'){
+      endSession(errorText(error));
+      throw abandoned;
+    }
+    if(identity&&errorCode(error)==='CRM_FORBIDDEN'){
+      try{
+        const updated=await call('crmSession',identity.token);
+        if(view===viewId&&updated.role!==identity.role){
+          openSession({...updated,token:identity.token});
+          throw abandoned;
+        }
+      }catch(checkError){
+        if(checkError===abandoned||view!==viewId)throw abandoned;
+        if(errorCode(checkError)==='CRM_AUTH_REQUIRED'){
+          endSession(errorText(checkError));
+          throw abandoned;
+        }
+      }
+    }
+    throw new Error(errorText(error));
+  }
+}
+function status(message='',error=false){
+  const node=byId('status');
+  node.textContent=message;
+  node.classList.toggle('error',error);
+}
+function dateLabel(day){return day?day.split('-').reverse().join('.'):'';}
+function dueKind(lead){
+  if(['Клиент','Отказ'].includes(lead.stage))return 'closed';
+  if(!lead.due)return 'none';
+  return lead.due<db.today?'late':lead.due===db.today?'today':'planned';
+}
+function recordButton(lead, onBoard){
+  const button=document.createElement('button');
+  button.type='button'; button.className='record'; button.dataset.id=lead.id;
+  button.draggable=onBoard&&canEdit();
+  if(current?.id===lead.id)button.setAttribute('aria-current','true');
+  const name=document.createElement('strong'), info=document.createElement('span');
+  name.textContent=lead.name;
+  info.textContent=[lead.city,lead.profile,!onBoard&&lead.stage,lead.due&&dateLabel(lead.due)].filter(Boolean).join(' · ');
+  button.append(name,info);
+  return button;
+}
+function renderBoard(matches){
+  const stages=new Map(db.stages.map(stage=>[stage,[]]));
+  const other=[];
+  for(const lead of matches)(stages.get(lead.stage)??other).push(lead);
+  if(other.length)stages.set('',other);
+  const board=byId('board');
+  const scrollPositions=new Map([...board.children].map(column=>[column.dataset.stage,column.lastElementChild.scrollTop]));
+  board.replaceChildren(...Array.from(stages,([stage,leads])=>{
+    const column=document.createElement('section');
+    column.className='column'; column.dataset.stage=stage;
+    const heading=document.createElement('h3'), count=document.createElement('span');
+    count.className='count'; count.textContent=leads.length;
+    heading.append(count,stage||'Без этапа');
+    const list=document.createElement('div');
+    list.className='column-list';
+    list.append(...leads.map(lead=>recordButton(lead,true)));
+    column.append(heading,list);
+    return column;
+  }));
+  for(const column of board.children)column.lastElementChild.scrollTop=scrollPositions.get(column.dataset.stage)??0;
+}
+function renderList(){
+  const query=byId('search').value.trim().toLocaleLowerCase('ru');
+  const stage=byId('filterStage').value, due=byId('filterDue').value;
+  const matches=db.leads.filter(lead=>
+    (!stage||stage===lead.stage)&&(!due||due===dueKind(lead))&&
+    [lead.id,lead.name,lead.city].some(value=>String(value).toLocaleLowerCase('ru').includes(query))
+  );
+  byId('result').textContent='Найдено '+matches.length+' из '+db.leads.length;
+  if(byId('boardView').hidden)byId('list').replaceChildren(...matches.map(lead=>recordButton(lead,false)));
+  else renderBoard(matches);
+}
+function renderRecord(lead){
+  current=lead;
+  const summary=db.leads.find(item=>item.id===lead.id);
+  if(summary){
+    summary.stage=lead.fields[0];
+    summary.due=lead.fields[2];
+  }
+  byId('title').textContent=lead.name;
+  byId('meta').textContent=[lead.city,lead.address,lead.profile,lead.id].filter(Boolean).join(' · ');
+  byId('contacts').textContent=[lead.phones,lead.channels].filter(Boolean).join(' · ');
+  byId('links').replaceChildren(...lead.links.flatMap((url,i)=>{
+    if(!/^https:\/\//i.test(url))return [];
+    const link=document.createElement('a');
+    link.href=url; link.rel='noopener noreferrer'; link.textContent=(i?'Яндекс':'2ГИС')+' ↗';
+    return [link,document.createTextNode('  ')];
+  }));
+  fields.forEach((key,i)=>{form.elements[key].value=lead.fields[i];});
+  byId('history').replaceChildren(...lead.history.map(row=>{
+    const line=document.createElement('p');
+    line.className='history-entry'; line.textContent=row.filter(Boolean).join(' · ');
+    return line;
+  }));
+  if(!lead.history.length)byId('history').textContent='Контакты ещё не записаны.';
+  const journal=Array.isArray(lead.audit)?lead.audit:[];
+  byId('audit').replaceChildren(...journal.map(entry=>{
+    const item=document.createElement('article');
+    item.className='history-entry audit-entry';
+    const title=document.createElement('strong');
+    title.textContent=[entry.at,entry.email,entry.action].filter(Boolean).join(' · ');
+    const changes=document.createElement('ul');
+    for(const change of entry.changes??[]){
+      const line=document.createElement('li');
+      const field=document.createElement('strong');
+      field.textContent=change.field||'Поле';
+      line.append(field,' · '+(change.before||'Пусто')+' → '+(change.after||'Пусто'));
+      changes.append(line);
+    }
+    item.append(title);
+    if(changes.childElementCount)item.append(changes);
+    return item;
+  }));
+  if(!journal.length)byId('audit').textContent='Изменений пока нет.';
+  form.hidden=byId('recordHistory').hidden=byId('recordAudit').hidden=false;
+  updateReloadLabel();
+  renderList();
+}
+async function load(id,focus=false){
+  if(busy)return;
+  const request=++requestId;
+  loading=true;
+  refreshRequired=refreshRequired&&selectedId===id;
+  selectedId=id;
+  current=null;
+  reloadRecord.hidden=false;
+  reloadRecord.disabled=true;
+  if(!refreshRequired)activity.reset();
+  byId('recordPanel').hidden=false;
+  byId('title').textContent='Загрузка карточки';
+  for(const key of ['meta','contacts','links'])byId(key).replaceChildren();
+  status('Загружаю карточку…');
+  form.hidden=byId('recordHistory').hidden=byId('recordAudit').hidden=true;
+  updateReloadLabel();
+  try {
+    const lead=await crmCall('crmRead',id);
+    if(request!==requestId)return;
+    refreshRequired=false;
+    renderRecord(lead);
+    status();
+    if(focus){
+      byId('title').focus({preventScroll:true});
+      byId('recordPanel').scrollIntoView({block:'start'});
+    }
+  } catch(error) {
+    if(request!==requestId||error===abandoned)return;
+    byId('title').textContent='Карточка недоступна';
+    status(error.message,true);
+  } finally {
+    if(request===requestId){
+      loading=false;
+      reloadRecord.disabled=false;
+    }
+  }
+}
+function cardDirty(){
+  return canEdit()&&current&&!form.hidden&&fields.some((key,i)=>form.elements[key].value!==current.fields[i]);
+}
+function activityDirty(){
+  const action=activity.elements.action;
+  return canEdit()&&selectedId&&
+    (activity.elements.comment.value!==''||action.value!==action.options[0]?.value);
+}
+function updateReloadLabel(){
+  reloadRecord.textContent=!refreshRequired&&(cardDirty()||activityDirty())?'Отменить правки':'Обновить карточку';
+}
+for(const editor of [form,activity]){
+  editor.addEventListener('input',updateReloadLabel);
+  editor.addEventListener('change',updateReloadLabel);
+}
+reloadRecord.addEventListener('click',()=>load(selectedId,true));
+function openRecord(event){
+  const id=event.target.closest('button[data-id]')?.dataset.id;
+  if(!id||busy)return;
+  if(id===current?.id&&!form.hidden){byId('recordPanel').scrollIntoView({block:'nearest'});return;}
+  if(id===selectedId&&refreshRequired){load(id,true);return;}
+  if(cardDirty()||activityDirty()){
+    status(refreshRequired?'Нажмите «Обновить карточку», чтобы вернуться к черновику контакта.':
+      'Завершите редактирование этой карточки или нажмите «Отменить правки».',true);
+    return;
+  }
+  load(id,true);
+}
+byId('list').addEventListener('click',openRecord);
+const board=byId('board');
+board.addEventListener('click',openRecord);
+function setView(showBoard){
+  byId('showBoard').setAttribute('aria-pressed',showBoard);
+  byId('showList').setAttribute('aria-pressed',!showBoard);
+  byId('workspace').classList.toggle('board-view',showBoard);
+  byId('boardView').hidden=!showBoard;
+  byId('list').hidden=showBoard;
+  if(!showBoard)byId('recordPanel').hidden=false;
+  if(db)renderList();
+}
+byId('showBoard').addEventListener('click',()=>setView(true));
+byId('showList').addEventListener('click',()=>setView(false));
+function boardStatus(message,error=false){
+  const node=byId('boardStatus');
+  node.textContent=message;
+  node.classList.toggle('error',error);
+}
+function highlight(column){
+  if(column===targetColumn)return;
+  targetColumn?.classList.remove('is-target');
+  targetColumn=column;
+  targetColumn?.classList.add('is-target');
+}
+function finishDrag(){
+  dragged?.classList.remove('dragging');
+  dragged=null;
+  highlight(null);
+}
+board.addEventListener('dragstart',event=>{
+  const button=event.target.closest('button[data-id]');
+  if(!canEdit()||!button||busy||loading){event.preventDefault();return;}
+  dragged=button;
+  dragged.classList.add('dragging');
+  event.dataTransfer.effectAllowed='move';
+  event.dataTransfer.setData('text/plain',button.dataset.id);
+});
+board.addEventListener('dragover',event=>{
+  if(!dragged)return;
+  const column=event.target.closest('.column');
+  highlight(column?.dataset.stage?column:null);
+  if(!targetColumn)return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect='move';
+});
+board.addEventListener('dragleave',event=>{
+  if(!targetColumn?.contains(event.relatedTarget))highlight(null);
+});
+board.addEventListener('dragend',finishDrag);
+board.addEventListener('drop',event=>{
+  const stage=event.target.closest('.column')?.dataset.stage;
+  if(!dragged||!stage)return;
+  event.preventDefault();
+  const id=dragged.dataset.id;
+  finishDrag();
+  moveCard(id,stage);
+});
+async function moveCard(id,stage){
+  if(!canEdit()||busy||loading)return;
+  const view=viewId;
+  const lead=db.leads.find(lead=>lead.id===id);
+  if(!lead||lead.stage===stage)return;
+  if(current?.id===id&&cardDirty()){
+    boardStatus('Сначала сохраните открытые правки этой карточки.',true);
+    return;
+  }
+  setBusy(true);
+  boardStatus('Сохраняю этап…');
+  try{
+    const saved=await crmCall('crmMove',id,String(lead.stage),stage);
+    lead.stage=saved.stage;
+    if(current?.id===id&&!form.hidden){
+      current.fields[0]=saved.stage;
+      form.elements.stage.value=saved.stage;
+    }
+    renderList();
+    boardStatus(saved.conflict?'Этап уже изменился в таблице. На доске показан актуальный этап.':
+      lead.name+' → '+saved.stage+'. Сохранено.',saved.conflict);
+    if(current?.id===id&&!form.hidden){
+      await refreshAfterWrite(id,saved.conflict?'Карточка обновлена.':'Этап сохранён.');
+    }
+  }catch(error){if(error!==abandoned)boardStatus(error.message||'Этап не сохранился. Повторите перенос.',true);}
+  finally{if(view===viewId)setBusy(false);}
+}
+for(const id of ['search','filterStage','filterDue'])byId(id).addEventListener(id==='search'?'input':'change',()=>{if(db)renderList();});
+function setBusy(value){
+  busy=value;
+  for(const control of [...form.elements,...activity.elements])control.disabled=value||!canEdit();
+  reloadRecord.disabled=value||loading;
+}
+async function submit(task){
+  if(!canEdit()||busy||!current)return;
+  const view=viewId;
+  setBusy(true);
+  status('Сохраняю…');
+  try{await task();}
+  catch(error){if(error!==abandoned)status(error.message,true);}
+  finally{if(view===viewId)setBusy(false);}
+}
+async function refreshAfterWrite(id,message){
+  try{
+    renderRecord(await crmCall('crmRead',id));
+    status(message);
+  }catch(error){
+    if(error===abandoned)return;
+    current=null;
+    refreshRequired=true;
+    form.hidden=byId('recordHistory').hidden=byId('recordAudit').hidden=true;
+    updateReloadLabel();
+    status(message+' Для продолжения нажмите «Обновить карточку».',true);
+  }
+}
+form.addEventListener('submit',event=>{
+  event.preventDefault();
+  submit(async()=>{
+    const id=current.id;
+    await crmCall('crmSave',id,current.fields,fields.map(key=>form.elements[key].value));
+    await refreshAfterWrite(id,'Карточка сохранена.');
+  });
+});
+activity.addEventListener('submit',event=>{
+  event.preventDefault();
+  if(cardDirty()){status('Сначала сохраните изменения карточки.',true);return;}
+  submit(async()=>{
+    const id=current.id;
+    await crmCall('crmRecord',id,activity.elements.action.value,activity.elements.comment.value);
+    activity.reset();
+    await refreshAfterWrite(id,'Контакт добавлен в историю.');
+  });
+});
+function setFormBusy(target,value){
+  for(const control of target.elements)control.disabled=value;
+}
+function resetWorkspace(){
+  viewId+=1;
+  requestId+=1;
+  db=current=selectedId=null;
+  loading=refreshRequired=false;
+  finishDrag();
+  form.reset();
+  activity.reset();
+  accessEditor.reset();
+  setFormBusy(accessEditor,false);
+  setBusy(false);
+  byId('search').value='';
+  byId('filterDue').value='';
+  byId('filterStage').replaceChildren(option('','Все'));
+  byId('result').textContent='Загружаю базу…';
+  byId('title').textContent='Выберите лид';
+  for(const id of ['board','list','history','audit','meta','contacts','links','accessList'])byId(id).replaceChildren();
+  for(const id of ['editor','recordPanel','recordHistory','recordAudit','reloadRecord'])byId(id).hidden=true;
+  for(const id of ['recordHistory','recordAudit','adminPanel'])byId(id).open=false;
+  byId('identityLabel').textContent='';
+  status();
+  boardStatus();
+  accessStatus('adminStatus');
+}
+function updateEmailResend(){
+  clearTimeout(emailResendTimer);
+  const delay=emailResendUntil-Date.now();
+  resendEmail.disabled=delay>0;
+  if(delay>0)emailResendTimer=setTimeout(updateEmailResend,delay);
+}
+function resetEmailSignIn(){
+  emailAddress='';
+  emailResendUntil=0;
+  emailStart.reset();
+  emailVerify.reset();
+  setFormBusy(emailStart,false);
+  setFormBusy(emailVerify,false);
+  emailStart.hidden=false;
+  emailVerify.hidden=true;
+  byId('emailDestination').textContent='';
+  updateEmailResend();
+}
+function showSignIn(message=''){
+  byId('workspace').hidden=byId('signedInPanel').hidden=byId('adminPanel').hidden=true;
+  byId('signInPanel').hidden=false;
+  byId('signInPanel').open=true;
+  const hasYandex=loginOptions?.yandex===true;
+  const hasEmail=loginOptions?.email===true;
+  resetEmailSignIn();
+  byId('emailSignIn').hidden=!hasEmail;
+  byId('providerSignIn').hidden=!hasYandex;
+  byId('beginYandex').disabled=false;
+  byId('yandexSignIn').hidden=true;
+  byId('yandexSignIn').removeAttribute('href');
+  accessStatus('signInStatus',message||(!hasYandex&&!hasEmail?'Для текущего аккаунта доступ не выдан. Обратитесь к администратору.':''),!!message);
+}
+function endSession(message=''){
+  session=null;
+  storage('set');
+  resetWorkspace();
+  showSignIn(message);
+}
+async function loadWorkspace(){
+  try{
+    db=await crmCall('crmList');
+    byId('filterStage').append(...db.stages.map(stage=>option(stage)));
+    form.elements.stage.replaceChildren(...db.stages.map(stage=>option(stage)));
+    activity.elements.action.replaceChildren(...db.actions.map(action=>option(action)));
+    renderList();
+    if(db.selectedId)load(db.selectedId);
+  }catch(error){
+    if(error===abandoned)return;
+    byId('result').textContent='База недоступна';
+    boardStatus(error.message,true);
+  }
+}
+function openSession(identity){
+  const display=identity?.email||((identity?.provider==='yandex'&&identity.subject)?'Яндекс ID '+identity.subject:'');
+  if(!Object.hasOwn(roleLabels,identity?.role??'')||typeof display!=='string'||!display||typeof identity.token!=='string'||(!identity.token&&identity.method!=='google')){
+    throw new Error('Не удалось подтвердить вход.');
+  }
+  session=identity;
+  storage('set',identity.token);
+  resetWorkspace();
+  resetEmailSignIn();
+  byId('signInPanel').hidden=true;
+  byId('signedInPanel').hidden=byId('workspace').hidden=false;
+  byId('identityLabel').textContent=[display,roleLabels[identity.role]].join(' · ');
+  byId('signOut').textContent=identity.token?'Выйти':'Закрыть кабинет';
+  byId('adminPanel').hidden=identity.role!=='admin';
+  byId('yandexAccess').hidden=loginOptions?.yandex!==true;
+  byId('saveCard').hidden=activity.hidden=!canEdit();
+  byId('boardHint').textContent=canEdit()
+    ?'Перетащите карточку в другой этап. На телефоне откройте карточку, выберите этап и сохраните.'
+    :'Доступ на просмотр. Нажмите карточку, чтобы увидеть подробности.';
+  setView(true);
+  loadWorkspace();
+}
+async function requestEmailCode(email){
+  if(loginOptions?.email!==true)return;
+  const view=viewId;
+  let sent=false;
+  setFormBusy(emailStart,true);
+  setFormBusy(emailVerify,true);
+  accessStatus('signInStatus','Запрашиваю код…');
+  try{
+    if(!emailProof){
+      emailProof=Array.from(crypto.getRandomValues(new Uint8Array(32)),byte=>byte.toString(16).padStart(2,'0')).join('');
+    }
+    await call('crmEmailStart',email,emailProof);
+    if(view!==viewId)return;
+    sent=true;
+    emailAddress=email;
+    emailResendUntil=Date.now()+90000;
+    emailVerify.reset();
+    byId('emailDestination').textContent='Адрес: '+email;
+    emailStart.hidden=true;
+    emailVerify.hidden=false;
+    accessStatus('signInStatus','Если администратор дал доступ, код придёт на указанную почту. Код действует 10 минут. Новый код можно запросить через 90 секунд.');
+  }catch(error){
+    if(view===viewId)accessStatus('signInStatus',errorText(error),true);
+  }finally{
+    if(view===viewId){
+      setFormBusy(emailStart,false);
+      setFormBusy(emailVerify,false);
+      updateEmailResend();
+      if(sent)emailVerify.elements.code.focus();
+    }
+  }
+}
+emailStart.addEventListener('submit',event=>{
+  event.preventDefault();
+  const email=emailStart.elements.email.value.trim();
+  if(email)requestEmailCode(email);
+});
+resendEmail.addEventListener('click',()=>{
+  if(emailAddress&&Date.now()>=emailResendUntil)requestEmailCode(emailAddress);
+});
+byId('changeEmail').addEventListener('click',()=>{
+  const email=emailAddress;
+  resetEmailSignIn();
+  emailStart.elements.email.value=email;
+  emailStart.elements.email.focus();
+  accessStatus('signInStatus');
+});
+emailVerify.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(loginOptions?.email!==true||!emailAddress||!emailProof)return;
+  const view=viewId, code=emailVerify.elements.code.value.trim();
+  setFormBusy(emailVerify,true);
+  accessStatus('signInStatus','Проверяю код…');
+  try{
+    const {token,session:identity}=await call('crmEmailVerify',emailAddress,emailProof,code);
+    if(view===viewId)openSession({...identity,token,provider:'email'});
+  }catch(error){
+    if(view===viewId)accessStatus('signInStatus',errorText(error),true);
+  }finally{
+    if(view===viewId){
+      setFormBusy(emailVerify,false);
+      updateEmailResend();
+    }
+  }
+});
+byId('beginYandex').addEventListener('click',async event=>{
+  if(loginOptions?.yandex!==true)return;
+  const button=event.currentTarget, link=byId('yandexSignIn');
+  button.disabled=true;
+  link.hidden=true;
+  link.removeAttribute('href');
+  accessStatus('signInStatus','Подготавливаю вход…');
+  try{
+    const proof=Array.from(crypto.getRandomValues(new Uint8Array(32)),byte=>byte.toString(16).padStart(2,'0')).join('');
+    try{sessionStorage.setItem(yandexProofKey,proof);}
+    catch(error){throw new Error('Откройте CRM в отдельной вкладке, чтобы продолжить вход через Яндекс ID.');}
+    const {url}=await call('crmBeginYandex',proof);
+    if(!/^https:\/\/oauth\.yandex\.ru\/authorize\?/.test(url))throw new Error('Не удалось подготовить вход через Яндекс ID.');
+    link.href=url;
+    link.hidden=false;
+    link.focus();
+    accessStatus('signInStatus','Нажмите «Продолжить в Яндекс ID».');
+  }catch(error){accessStatus('signInStatus',errorText(error),true);}
+  finally{button.disabled=false;}
+});
+byId('signOut').addEventListener('click',async()=>{
+  const identity=session, token=identity?.token;
+  endSession('Кабинет закрыт.');
+  if(!token)return;
+  const view=viewId;
+  const method=identity.provider==='email'||identity.method==='email'?'crmEmailLogout':'crmLogout';
+  try{await call(method,token);}
+  catch(error){
+    if(view===viewId)accessStatus('signInStatus','Кабинет закрыт на этом устройстве. Срок сессии истечёт автоматически.',true);
+  }
+});
+async function loadAccess(successMessage=''){
+  if(session?.role!=='admin'||loginOptions?.yandex!==true)return;
+  accessStatus('adminStatus',successMessage||'Загружаю список…');
+  try{
+    const entries=await crmCall('crmAccessList');
+    byId('accessList').replaceChildren(...entries.map(entry=>{
+      const item=document.createElement('li');
+      item.textContent=[entry.email,roleLabels[entry.role]??entry.role].join(' · ');
+      return item;
+    }));
+    accessStatus('adminStatus',successMessage||(entries.length?'':'Приглашений пока нет.'));
+  }catch(error){
+    if(error!==abandoned)accessStatus('adminStatus',successMessage?successMessage+' Список пока не обновился.':error.message,true);
+  }
+}
+byId('adminPanel').addEventListener('toggle',()=>{
+  if(byId('adminPanel').open)loadAccess();
+});
+accessEditor.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(session?.role!=='admin'||loginOptions?.yandex!==true)return;
+  const view=viewId, {account,role}=accessEditor.elements;
+  const address=account.value.trim(), nextRole=role.value;
+  setFormBusy(accessEditor,true);
+  accessStatus('adminStatus','Сохраняю права…');
+  try{
+    await crmCall('crmSetAccess',address,nextRole);
+    accessEditor.reset();
+    await loadAccess(nextRole?'Права сохранены.':'Доступ отозван.');
+  }catch(error){if(error!==abandoned)accessStatus('adminStatus',error.message,true);}
+  finally{if(view===viewId)setFormBusy(accessEditor,false);}
+});
+async function finishYandex(){
+  showSignIn();
+  accessStatus('signInStatus','Проверяю вход через Яндекс ID…');
+  let proof;
+  try{
+    proof=sessionStorage.getItem(yandexProofKey);
+    sessionStorage.removeItem(yandexProofKey);
+  }catch(error){
+    accessStatus('signInStatus','Откройте CRM в отдельной вкладке и начните вход заново.',true);
+    return;
+  }
+  try{google.script.history.replace({}, {}, '');}catch(error){}
+  if(yandexCallback.error||!proof||!yandexCallback.code||!yandexCallback.state){
+    accessStatus('signInStatus','Не удалось завершить вход через Яндекс ID. Начните вход заново.',true);
+    return;
+  }
+  try{
+    const identity=await call('crmFinishYandex',yandexCallback.code,yandexCallback.state,proof);
+    if(identity.pending){
+      accessStatus('signInStatus','Передайте администратору ваш ID для выдачи доступа: yandex:'+identity.subject);
+      return;
+    }
+    openSession(identity);
+  }catch(error){accessStatus('signInStatus',errorText(error),true);}
+}
+async function start(){
+  byId('frameGate').hidden=true;
+  if(yandexCallback){
+    await finishYandex();
+    return;
+  }
+  if(initialSession){
+    try{
+      openSession(initialSession);
+      return;
+    }catch(error){endSession(errorText(error));return;}
+  }
+  const token=storage('get');
+  if(token||legacyAccess){
+    try{
+      const identity=await call('crmSession',token??'');
+      openSession({...identity,token:token??''});
+      return;
+    }catch(error){
+      endSession(errorText(error));
+      return;
+    }
+  }
+  showSignIn();
+}
+const embedChannel="";
+const allowedSite='https://locanilia377-commits.github.io';
+if(embedChannel){
+  byId('frameGate').hidden=false;
+  function unlock(event){
+    if(event.source!==window.top||event.origin!==allowedSite||
+       event.data?.type!=='fiverox-crm:open'||event.data.channel!==embedChannel)return;
+    window.removeEventListener('message',unlock);
+    start();
+  }
+  window.addEventListener('message',unlock);
+  window.top.postMessage({type:'fiverox-crm:ready',channel:embedChannel,accessGranted:true},allowedSite);
+}else{
+  start();
+}
+})();
+</script>
+</body>
+</html>
