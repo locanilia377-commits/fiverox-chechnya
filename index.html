@@ -154,6 +154,20 @@ const basketDefaults=[
  {label:'Полиуретановая плёнка',quantity:3,price:52000},
 ];
 const sale={outlets:0,target:10,margin:20,basket:basketDefaults.map(item=>({...item}))};
+const saleStorageKey='fiverox-chechnya:sales-model:v1';
+try {
+ const saved=JSON.parse(localStorage.getItem(saleStorageKey));
+ for(const key of ['outlets','target','margin']){
+  if(Number.isFinite(saved?.[key]))sale[key]=saved[key];
+ }
+ sale.basket.forEach((item,i)=>{
+  const entry=saved?.basket?.[i];
+  if(Number.isFinite(entry?.quantity))item.quantity=entry.quantity;
+  if(Number.isFinite(entry?.price))item.price=entry.price;
+ });
+} catch {
+ // The calculator can still run when browser storage is unavailable or invalid.
+}
 function modelCharts(target,margin,basket,unitRevenue){
  const volumes=[...new Set([1,Math.ceil(target/2),target])].sort((a,b)=>a-b);
  return '<div class="chart-grid auto-charts">'
@@ -248,7 +262,7 @@ function openLead(id){
 function modelView(){
  const input=(id,label,min,max,step,value)=>'<label>'+esc(label)+'<input id="'+id+'" type="number" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
  const basketInputs=sale.basket.map((r,i)=>'<div class="basket-row"><strong>'+esc(r.label)+'</strong>'+input('quantity'+i,'Рулонов',0,1000,1,r.quantity)+input('price'+i,'Цена за рулон, ₽',0,10000000,0.01,r.price)+'<span class="basket-result" id="basketCost'+i+'"></span></div>').join('');
- main.innerHTML=hero('Модель продаж · FIVEROX','От подключений к обороту','Подставьте количество точек, состав корзины и маржу. Итоги и графики меняются сразу.')
+ main.innerHTML=hero('Модель продаж · FIVEROX','От подключений к обороту','Подставьте количество точек, состав корзины и маржу. Введённые числа сохраняются в этом браузере.')
   +'<div class="split model-layout"><section class="panel"><h2 class="subhead">Параметры</h2><div class="inputs">'
   +input('outlets','Подключённые точки',0,10000,1,sale.outlets)+input('target','Цель по точкам',1,10000,1,sale.target)+input('margin','Маржа, %',0,100,0.1,sale.margin)
   +'</div><button class="button" id="example" type="button">Пример на 10 точек</button><p id="goalLabel" class="note"></p><progress id="goal" class="progress" aria-label="Прогресс подключения" value="0" max="100"></progress></section>'
@@ -279,11 +293,19 @@ function modelView(){
   field('modelMetrics').innerHTML=metric('Оборот / месяц',money.format(points*unitRevenue),'Подключённые точки × корзина')+metric('По марже / месяц',money.format(points*unitRevenue*margin/100),'При марже '+nf.format(margin)+'%')+metric('Рулонов / месяц',nf.format(points*rolls),fmt(rolls)+' рулонов на точку');
   field('modelChart').innerHTML=modelCharts(target,margin,basket,unitRevenue);
  }
- for(const el of main.querySelectorAll('input[type=number]'))el.addEventListener('input',update);
- field('example').addEventListener('click',()=>{field('outlets').value=10;field('target').value=10;field('margin').value=20;update();});
+ function updateAndSave(){
+  update();
+  try {
+   localStorage.setItem(saleStorageKey,JSON.stringify(sale));
+  } catch {
+   // Browser storage restrictions do not prevent recalculation.
+  }
+ }
+ for(const el of main.querySelectorAll('input[type=number]'))el.addEventListener('input',updateAndSave);
+ field('example').addEventListener('click',()=>{field('outlets').value=10;field('target').value=10;field('margin').value=20;updateAndSave();});
  field('resetBasket').addEventListener('click',()=>{
   basketDefaults.forEach((r,i)=>{field('quantity'+i).value=r.quantity;field('price'+i).value=r.price;});
-  update();
+  updateAndSave();
  });
  update();
 }
