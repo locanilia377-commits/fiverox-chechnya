@@ -225,6 +225,7 @@ const crmWeb = (() => {
   unmount?.();
   const button=root.querySelector('#crmOpen');
   const login=root.querySelector('#crmGoogleLogin');
+  const directLink=root.querySelector('#crmDirectLink');
   const status=root.querySelector('#crmStatus');
   const frame=root.querySelector('#crmFrame');
   if(!validUrl){
@@ -236,6 +237,8 @@ const crmWeb = (() => {
   accountChooser.searchParams.set('continue',deployed);
   login.href=accountChooser.href;
   login.hidden=false;
+  directLink.href=deployed;
+  directLink.hidden=false;
   button.disabled=false;
   let timer,channel;
   const controller=new AbortController();
@@ -559,7 +562,7 @@ function crmView(){
  main.innerHTML=hero('FIVEROX · рабочий кабинет','CRM','Рабочая база Чеченской Республики.')
   +`<section id="crmInline" aria-label="Редактор CRM">
    <div class="crm-entry"><div><h2>Воронка и карточки</h2><p>Доступ через Google для владельца и редакторов закрытой таблицы.</p></div>
-    <div class="crm-links"><button id="crmOpen" class="button" type="button" disabled>Открыть редактор</button><a id="crmGoogleLogin" target="_blank" rel="noopener noreferrer" hidden>Войти через Google ↗</a></div>
+    <div class="crm-links"><button id="crmOpen" class="button" type="button" disabled>Открыть редактор</button><a id="crmGoogleLogin" target="_blank" rel="noopener noreferrer" hidden>Войти через Google ↗</a><a id="crmDirectLink" target="_blank" rel="noopener noreferrer" hidden>CRM в новой вкладке ↗</a></div>
     <p id="crmStatus" class="crm-status" role="status"></p>
    </div>
    <iframe id="crmFrame" class="crm-frame" title="Редактор карточек FIVEROX CRM" referrerpolicy="no-referrer" hidden></iframe>
