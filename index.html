@@ -110,6 +110,45 @@ main .hero p { margin-top: 9px; }
 .evidence-value small { font-size: 11px; font-weight: 500; }
 .model-metrics { margin-bottom: 16px; }
 .model-metrics .metric:first-child { background: #dff4eb; border-color: #b9dbce; }
+.lead-metrics { margin-bottom: 12px; }
+.lead-metrics .metric { padding: 12px 15px; }
+.lead-metrics .metric strong { font-size: clamp(24px, 3vw, 32px); }
+.lead-metrics .metric small:empty { display: none; }
+.lead-overview { padding: 0 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); margin-bottom: 12px; }
+.lead-overview > summary { padding: 9px 0; font-size: 14px; }
+.lead-overview .dashboard-block { margin: 10px 0 16px; }
+#leadFilters { padding: 16px; }
+#leadFilters .section-head { margin-bottom: 10px; }
+#leadFilters .section-head .eyebrow { margin-bottom: 5px; }
+#leadFilters .section-head h2 { font-size: 23px; }
+#leadFilters .filter-more label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 650; }
+.lead-compact { position: relative; grid-template-rows: auto 1fr auto auto; align-content: stretch; gap: 7px; padding: 13px 15px 10px; }
+.lead-compact:hover, .lead-compact:focus-within { border-color: #83b8a6; background: #f8fdfb; }
+.lead-city { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 650; }
+.lead-city svg { flex: 0 0 auto; color: var(--accent); }
+.lead-open { border: 0; padding: 0; background: none; text-align: left; color: inherit; font-weight: inherit; overflow-wrap: anywhere; }
+.lead-open::after { content: ""; position: absolute; inset: 0; border-radius: 16px; }
+.lead-open:focus-visible { outline: none; }
+.lead-open:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 3px; }
+.lead-facts { align-self: start; }
+.lead-facts .price-status { border: 1px solid var(--line); }
+.price-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; align-self: center; margin-right: 5px; }
+.price-status.priced { background: #edf8f1; color: #175b42; border-color: #cde7d8; }
+.price-status.conditional { background: #fcf5e9; color: #79521e; border-color: #eadcc3; }
+.price-status.unpriced { background: #f1f4f5; color: #435960; }
+.lead-footer { border-top: 1px solid var(--line); padding-top: 7px; display: flex; align-items: center; justify-content: space-between; color: var(--accent); font-size: 12px; font-weight: 690; }
+.lead-footer span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #e7f4ee; font-size: 15px; }
+.lead-dialog-header { padding-right: 32px; }
+.lead-dialog-header > p { margin-top: 6px; }
+.dialog-section .lead-contact-list { display: flex; flex-wrap: wrap; gap: 5px 13px; list-style: none; padding: 0; margin: 6px 0; }
+.dialog-section .lead-contact-list li { margin: 0; }
+.lead-price-list { display: grid; gap: 7px; margin-top: 8px; }
+.lead-price { padding: 10px 12px; border-radius: 9px; background: #f3f8f6; display: grid; gap: 4px; }
+.lead-price-heading, .lead-price-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.lead-price-heading { justify-content: space-between; }
+.lead-price-heading h4 { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.lead-price-heading strong { color: var(--accent); white-space: nowrap; }
+.lead-price-meta { color: var(--muted); }
 @media(max-width:990px) {
  .market-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
  .income-tile { grid-column: 1 / -1; }
@@ -122,6 +161,8 @@ main .hero p { margin-top: 9px; }
  .market-tile { padding: 15px; }
  .model-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
  .model-metrics .metric:first-child { grid-column: 1 / -1; }
+ #leadFilters .filters > label:first-child { grid-column: 1 / -1; }
+ #leadDialog { padding: 18px 15px; }
 }
 </style>
 
@@ -284,6 +325,7 @@ function marketView(){
  +groups.map(([label,rows])=>disclosure(label,marketEvidence(rows))).join('')+'</div></section>';
 }
 const state={query:'',geo:'',city:'',profile:'confirmed',source:'',price:'',sort:'default',limit:24};
+let leadOverviewOpen=false;
 const labels={confirmed:'Подтверждённые',all:'Все точки','Оклейка':'Оклейка','Тонировка':'Тонировка','Оклейка + тонировка':'Обе услуги','Требует проверки':'Кандидаты'};
 function select(id,label,values){
  return '<label>'+esc(label)+'<select id="'+id+'">'+values.map(([k,l])=>'<option value="'+esc(k)+'"'+(state[id]===k?' selected':'')+'>'+esc(l)+'</option>').join('')+'</select></label>';
@@ -306,10 +348,13 @@ function selected(){
  return rows;
 }
 function leadCard(l){
- const sources=Object.entries(l.links).map(([name,url])=>link(url,name+' ↗')).join(' ');
- return '<article class="lead"><div class="pills">'+profilePill(l)+'<span class="pill source">'+esc(l.source)+'</span></div><h3>'+esc(l.name)+'</h3><p>'+esc(l.city)+' · '+esc(l.address)+'</p>'
- +'<p class="meta">'+(l.phones[0]?'<a href="tel:'+esc(l.phones[0])+'">'+esc(l.phones[0])+'</a>':'Телефон в прочитанной карточке не указан')+(l.prices.length?' · '+esc(l.priceStatus):'')+'</p>'
- +'<div class="lead-actions"><button class="button" type="button" data-lead="'+esc(l.id)+'">Карточка</button>'+sources+'</div></article>';
+ const [priceClass,priceLabel]=Number.isFinite(currentPrice(l))?['priced','Есть цены']:
+  l.prices.length?['conditional','Условия / материал']:['unpriced','Цены не найдены'];
+ const id=esc(l.id);
+ return '<article class="lead lead-compact"><div class="lead-city" id="lead-city-'+id+'"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16 8c0 4-6 9-6 9S4 12 4 8a6 6 0 1 1 12 0Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="8" r="1.8" stroke="currentColor" stroke-width="1.5"/></svg>'+esc(l.city)+'</div>'
+ +'<h3><button class="lead-open" type="button" data-lead="'+id+'" aria-haspopup="dialog" aria-describedby="lead-city-'+id+' lead-facts-'+id+'">'+esc(l.name)+'</button></h3>'
+ +'<div class="pills lead-facts" id="lead-facts-'+id+'">'+profilePill(l)+'<span class="pill price-status '+priceClass+'">'+priceLabel+'</span></div>'
+ +'<div class="lead-footer" aria-hidden="true">Контакты и прайс <span>→</span></div></article>';
 }
 function refresh(){
  const rows=selected();
@@ -320,7 +365,8 @@ function refresh(){
 function leadsView(){
  const counts=summary.byProfile;
  main.innerHTML=hero('Лиды и конкуренция · Проверка 07.11.2026','Оклейка и тонировка','Точки Чеченской Республики. Контакты, услуги и прайсы — в карточках.')
- +'<section class="metrics">'+metric('Точки в базе',summary.total,'Объединены совпадения по адресу')+metric('Подтверждённые',summary.confirmed,'Оклейка или тонировка')+metric('Обе услуги',counts['Оклейка + тонировка']??0,'Подтверждены раздельно')+metric('Кандидаты',summary.candidates,'Требуется подтверждение услуг')+'</section>'+leadCharts()
+ +'<section class="metrics lead-metrics" aria-label="Сводка базы">'+metric('Точки в базе',summary.total)+metric('Подтверждённые',summary.confirmed)+metric('Обе услуги',counts['Оклейка + тонировка']??0)+metric('Кандидаты',summary.candidates)+'</section>'
+ +'<details class="disclosure lead-overview" id="lead-overview"'+(leadOverviewOpen?' open':'')+'><summary>Графики конкуренции</summary>'+leadCharts()+'</details>'
  +'<section class="panel" id="leadFilters"><div class="section-head"><div><div class="eyebrow">Рабочий список</div><h2>Найти точку</h2></div><p>'+sheet+'</p></div><div class="filters">'
  +'<label>Поиск<input id="query" type="search" placeholder="Название, адрес или телефон" value="'+esc(state.query)+'"></label>'
  +select('geo','Территория',[['','Вся республика'],['Грозный','Грозный'],['Вне Грозного','Вне Грозного']])
@@ -331,12 +377,13 @@ function leadsView(){
  +select('sort','Сортировка',[['default','Сначала подтверждённые'],['name','По названию'],['price-up','По цене ↑'],['price-down','По цене ↓']])
  +'</div><div class="filter-tools"><p id="leadCount" class="lead-count" aria-live="polite"></p><button type="button" class="button" id="clear">Сбросить</button></div></section>'
  +'<section class="cards" id="cards" aria-label="Карточки организаций"></section><p class="note"><button class="button" type="button" id="more">Показать ещё</button></p>'
- +'<section class="panel"><details><summary>Охват двух карт и правила сверки</summary><p class="note">2ГИС показал 97 позиций на 9 страницах, включая географическую карточку и повтор. В исходной выдаче Яндекса учтены '+summary.yBase+' уникальная карточка, в расширенной по масштабу — '+summary.yWide+'. Счётчик Яндекса менялся при переходе по страницам, оба прохода доведены до пустой страницы. Дополнены карточки из октябрьского поиска с доступным профилем.</p><p class="note">Источники совпали для '+summary.matched+' точек. Если номер дома, корпус или адрес расходятся, карточки остаются в базе отдельно до проверки. Лиды квалифицированы по сведениям о конкретных услугах и прайсам. Наличие услуг и цены проверены по опубликованным данным без обзвона.</p>'
+ +'<section class="panel"><details class="disclosure"><summary>Охват двух карт и правила сверки</summary><p class="note">2ГИС показал 97 позиций на 9 страницах, включая географическую карточку и повтор. В исходной выдаче Яндекса учтены '+summary.yBase+' уникальная карточка, в расширенной по масштабу — '+summary.yWide+'. Счётчик Яндекса менялся при переходе по страницам, оба прохода доведены до пустой страницы. Дополнены карточки из октябрьского поиска с доступным профилем.</p><p class="note">Источники совпали для '+summary.matched+' точек. Если номер дома, корпус или адрес расходятся, карточки остаются в базе отдельно до проверки. Лиды квалифицированы по сведениям о конкретных услугах и прайсам. Наличие услуг и цены проверены по опубликованным данным без обзвона.</p>'
  +table(['Источник','Поиск','Стр.','Счётчик','Позиции','Новые ID','Результат'],tr(pageLog,r=>[esc(r.source),link(r.url,r.query),fmt(r.page),fmt(r.total),fmt(r.slots),fmt(r.added),esc(r.status)]))
  +'</details></section>';
  for(const id of ['query','geo','city','profile','source','price','sort'])document.querySelector('#'+id).addEventListener(id==='query'?'input':'change',e=>{state[id]=e.target.value;state.limit=24;refresh();});
  document.querySelector('#clear').addEventListener('click',()=>{Object.assign(state,{query:'',geo:'',city:'',profile:'all',source:'',price:'',sort:'default',limit:24});leadsView();document.querySelector('#query').focus();});
  document.querySelector('#more').addEventListener('click',()=>{state.limit+=24;refresh();});
+ document.querySelector('#lead-overview').addEventListener('toggle',e=>{leadOverviewOpen=e.target.open;});
  refresh();
 }
 function openLead(id){
@@ -345,14 +392,18 @@ function openLead(id){
  const sources=Object.entries(l.links).map(([name,url])=>link(url,name+' ↗')).join(' · ');
  const proof=l.proof.length?'<ul>'+l.proof.map(p=>'<li><strong>'+esc(p.service)+'</strong> · '+esc(p.text)+' · '+link(p.url,p.kind+' ↗')+'</li>').join('')+'</ul>':'<p class="note">Услуги нужно уточнить у компании.</p>';
  const contacts=[...l.phones.map(p=>'<a href="tel:'+esc(p)+'">'+esc(p)+'</a>'),...l.emails.map(p=>'<a href="mailto:'+esc(p)+'">'+esc(p)+'</a>'),...l.sites.map(p=>link(p,p)),...l.socials.map(p=>link(p,p))].filter(Boolean);
- const prices=l.prices.length?table(['Позиция','Цена','Дата / пометка','Источник'],
- tr(l.prices,p=>[esc(p.service)+(p.description?'<br><small>'+esc(p.description)+'</small>':''),p.amount==null?'н/д':esc(p.type==='От'?'от ':'')+esc(money.format(p.amount)),esc(p.type)+(p.updated?'<br>'+esc(p.updated):''),link(p.url,p.source+' ↗')+(p.alternativeUrl?'<br>'+link(p.alternativeUrl,'Дубль источника ↗'):'')])):'<p class="note">Позиции по плёнкам в просмотренных прайсах не найдены.</p>';
- document.querySelector('#dialogContent').innerHTML='<div class="eyebrow">Карточка '+esc(l.id)+'</div><h2 id="dialogTitle">'+esc(l.name)+'</h2><p>'+esc(l.city)+' · '+esc(l.address)+'</p><p class="pills">'+profilePill(l)+'</p>'
- +'<section class="dialog-section"><h3>Контакты</h3><p>'+(contacts.length?contacts.join('<br>'):'Контакты в просмотренных источниках не указаны.')+'</p>'+(l.hours?'<p>'+esc(l.hours)+'</p>':'')+'<p>'+sources+'</p>'
+ const prices=l.prices.length?'<div class="lead-price-list">'+l.prices.map(p=>{
+  const amount=p.amount==null?'н/д':(p.type==='От'?'от ':'')+money.format(p.amount);
+  return '<article class="lead-price"><div class="lead-price-heading"><h4>'+esc(p.service)+'</h4><strong>'+esc(amount)+'</strong></div>'
+   +(p.description?'<p>'+esc(p.description)+'</p>':'')+'<p class="lead-price-meta">'+esc(p.type)+(p.updated?' · '+esc(p.updated):'')+'</p><p class="lead-price-links">'+link(p.url,p.source+' ↗')+(p.alternativeUrl?link(p.alternativeUrl,'Дубль источника ↗'):'')+'</p></article>';
+ }).join('')+'</div>':'<p class="note">Позиции по плёнкам в просмотренных прайсах не найдены.</p>';
+ document.querySelector('#dialogContent').innerHTML='<div class="lead-dialog-header"><div class="eyebrow">Карточка '+esc(l.id)+'</div><h2 id="dialogTitle">'+esc(l.name)+'</h2><p>'+esc(l.city)+' · '+esc(l.address)+'</p><p class="pills">'+profilePill(l)+'</p></div>'
+ +'<section class="dialog-section"><h3>Контакты</h3>'+(contacts.length?'<ul class="lead-contact-list">'+contacts.map(contact=>'<li>'+contact+'</li>').join('')+'</ul>':'<p class="note">Контакты в просмотренных источниках не указаны.</p>')+(l.hours?'<p>'+esc(l.hours)+'</p>':'')+'<p>'+sources+'</p>'
  +l.ratings.filter(x=>x.rating!=null).map(x=>'<p>'+esc(x.source)+' · '+fmt(x.rating)+' / 5'+(x.reviews!=null?' · отзывов '+fmt(x.reviews):'')+'</p>').join('')+'</section>'
- +'<section class="dialog-section"><h3>Доказательства услуг</h3>'+proof+(l.review?'<p class="notice">'+esc(l.review)+'</p>':'')+(l.match?'<p>'+esc(l.match)+'</p>':'')+'</section>'
- +'<section class="dialog-section"><h3>Прайс</h3>'+prices+'<p class="note">Условные суммы и материал исключены из сортировки по цене. Дата просмотра карточки отличается от даты обновления прайса.</p></section>';
+ +'<section class="dialog-section"><h3>Прайс</h3>'+prices+(l.prices.length?'<p class="note">Сортировка учитывает опубликованные суммы. Дата в позиции — из прайса.</p>':'')+'</section>'
+ +'<div class="dialog-section">'+disclosure('Подтверждение услуг',proof+(l.review?'<p class="notice">'+esc(l.review)+'</p>':'')+(l.match?'<p>'+esc(l.match)+'</p>':''))+'</div>';
  dialog.showModal();
+ dialog.scrollTop=0;
 }
 function modelView(){
  const input=(id,label,min,max,step,value)=>'<label>'+esc(label)+'<input id="'+id+'" type="number" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
