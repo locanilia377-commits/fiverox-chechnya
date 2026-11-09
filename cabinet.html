@@ -640,7 +640,7 @@ async function requestEmailCode(email){
     byId('emailDestination').textContent='Адрес: '+email;
     emailStart.hidden=true;
     emailVerify.hidden=false;
-    accessStatus('signInStatus','Если администратор дал доступ, код придёт на указанную почту. Код действует 10 минут. Новый код можно запросить через 90 секунд.');
+    accessStatus('signInStatus','Запрос на код принят. Проверьте «Входящие» и «Спам» и введите код в этой же вкладке. Код действует 10 минут. Повторить запрос можно через 90 секунд. Если письма нет, уточните у администратора, что у этого адреса есть право редактировать закрытую Google Таблицу CRM.');
   }catch(error){
     if(view===viewId)accessStatus('signInStatus',errorText(error),true);
   }finally{
