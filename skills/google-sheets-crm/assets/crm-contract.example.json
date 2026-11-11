@@ -1,0 +1,18 @@
+{
+  "project": "",
+  "schema_version": "1",
+  "visibility": {
+    "public": ["company", "city", "services", "public_contacts", "published_prices"],
+    "private": ["stage", "manager", "due", "next_step", "last_contact", "note", "amount", "decline_reason", "history", "audit"]
+  },
+  "identity": {"stable_id_field": "lead_id", "id_type": "text", "uniqueness_required": true},
+  "access_model": null,
+  "auth_method": null,
+  "stages_example_only": ["Новый", "В работе", "Связались", "КП отправлено", "Переговоры", "Согласовано тестирование", "Проведено тестирование материала", "Клиент", "Отказ"],
+  "activity_types_example_only": ["Звонок", "Сообщение", "Встреча", "Отправка КП", "Другое"],
+  "working_fields": ["stage", "manager", "due", "next_step", "last_contact", "note", "amount", "decline_reason"],
+  "audit": {"scope": null, "atomic_with_write": true, "fields": ["at", "timezone", "actor", "action", "lead_id", "changes", "operation_id"]},
+  "mapping": {},
+  "backup_and_restore": null,
+  "performance_budget": null
+}

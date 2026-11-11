@@ -1,0 +1,6 @@
+interface:
+  display_name: "CRM на Google Таблицах"
+  short_description: "Кабинет, воронка, доступ и проверка сохранения"
+  default_prompt: "Используй $google-sheets-crm для создания или исправления CRM на Google Таблице с проверкой входа, сохранения карточек и журнала."
+policy:
+  allow_implicit_invocation: true

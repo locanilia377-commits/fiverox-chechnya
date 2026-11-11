@@ -1,0 +1,99 @@
+{
+  "project": "",
+  "frontend": {
+    "url": "",
+    "cabinet_url": "",
+    "commit": "",
+    "sha256": ""
+  },
+  "backend": {
+    "deployment_id": "",
+    "version": null,
+    "execute_as": "",
+    "access": "",
+    "auth_method": ""
+  },
+  "schema_version": "",
+  "legacy_routes": [],
+  "evidence_status_values": [
+    "passed",
+    "failed",
+    "not_tested",
+    "blocked",
+    "not_applicable"
+  ],
+  "evidence_level_values": [
+    "code",
+    "local",
+    "production"
+  ],
+  "checks": [
+    {
+      "scenario": "anonymous_public_and_private_denial",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "owner_login",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "invited_editor_delivery_login_save_audit",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "revoke_and_replay_denied",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "conflict_and_formula_preservation",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "mobile_and_primary_button",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    },
+    {
+      "scenario": "lost_response_and_idempotent_activity",
+      "status": "not_tested",
+      "at": null,
+      "release": null,
+      "evidence": null,
+      "evidence_level": null
+    }
+  ],
+  "audit_scope": "",
+  "known_limitations": [],
+  "rollback": {
+    "frontend_commit": "",
+    "backend_version": null,
+    "schema_compatibility": ""
+  },
+  "test_cleanup": {
+    "fixture_ids": [],
+    "status": "not_tested"
+  }
+}
