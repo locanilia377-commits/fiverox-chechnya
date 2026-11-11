@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#11283b">
+  <title>FIVEROX · CRM Workspace</title>
+  <meta name="description" content="Рабочее пространство менеджера FIVEROX: клиенты, задачи, посещения, тесты материалов и продажи.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b8b89'/%3E%3Cpath d='M9 8h15v4H13v5h9v4h-9v6H9z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+<p id="frameGate" class="frame-gate" hidden>Откройте CRM в отдельной вкладке.</p>
+<section id="authScreen" class="auth-screen">
+  <div class="auth-brand"><a class="brand" href="./">FIVEROX<span>CRM WORKSPACE</span></a><p>Клиенты. Действия. Результат.</p></div>
+  <details id="signInPanel" class="auth-panel" open>
+    <summary>Войти в личный кабинет</summary>
+    <p class="meta">Рабочие карточки открываются после входа с доступом от администратора.</p>
+    <div id="emailSignIn">
+      <form id="emailStart" class="access-form">
+        <p class="meta">Введите адрес, на который вам выдали доступ.</p>
+        <label>Электронная почта<input name="email" type="email" autocomplete="email" maxlength="254" required disabled></label>
+        <div><button type="submit" class="btn primary" disabled>Получить код</button></div>
+      </form>
+      <form id="emailVerify" class="access-form" hidden>
+        <p id="emailDestination" class="meta"></p>
+        <label>Код из письма<input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required></label>
+        <div class="access-actions">
+          <button type="submit" class="btn primary">Войти по коду</button>
+          <button type="button" id="resendEmail" class="btn">Отправить код ещё раз</button>
+          <button type="button" id="changeEmail" class="text-button">Другой адрес</button>
+        </div>
+      </form>
+    </div>
+    <p id="signInStatus" class="meta" role="status" aria-live="polite"></p>
+  </details>
+  <p class="auth-note">Доступ выдаёт администратор в закрытой Google Таблице CRM.</p>
+  <noscript><p class="auth-note">Для входа и работы с CRM включите JavaScript в браузере.</p></noscript>
+</section>
+<div id="appShell" class="shell" hidden>
+  <button id="navBackdrop" class="nav-backdrop" aria-label="Закрыть меню" hidden></button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#leads">FIVEROX<span>CRM WORKSPACE</span></a>
+    <div class="workspace-name"><span class="workspace-mark">F</span><div><strong>Чеченская Республика</strong><small>Рабочее пространство</small></div></div>
+    <div class="nav-label">РАБОТА С КЛИЕНТАМИ</div>
+    <nav id="nav" aria-label="Разделы CRM"></nav>
+    <div class="sidebar-bottom"><span class="sync-dot"></span> Закрытая CRM<div id="sidebarCount"></div><a id="sheetLink" target="_blank" rel="noopener noreferrer" hidden>Открыть Google Таблицу ↗</a></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div class="topbar-left"><button id="menuToggle" class="icon-button menu-toggle" aria-label="Открыть меню" aria-expanded="false">☰</button><span class="topbar-title">Рабочий стол</span><span class="topbar-divider"></span><span id="breadcrumb" class="muted"></span></div><div class="topbar-right"><span id="syncStatus" class="sync-status" role="status">Загрузка…</span><button id="refreshWorkspace" class="icon-button" aria-label="Обновить данные" title="Обновить данные">↻</button><details class="profile"><summary><span id="avatar" class="avatar"></span><span class="profile-text"><strong id="identityEmail"></strong><small id="identityRole"></small></span><span aria-hidden="true">⌄</span></summary><div class="profile-menu"><p id="accessNotice"></p><button type="button" id="signOut" class="btn">Выйти</button></div></details></div></header>
+    <div id="globalNotice" class="global-notice" role="status" hidden></div>
+    <main id="main" tabindex="-1"><div class="loading-state"><span class="loader"></span>Загружаю рабочее пространство…</div></main>
+    <footer><span>FIVEROX · CRM Workspace</span><span id="lastSync"></span><button type="button" data-action="help" class="text-button">Как работать с CRM</button></footer>
+  </div>
+</div>
+<div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
+<aside id="cardDrawer" class="card-drawer" role="dialog" aria-modal="true" aria-labelledby="cardTitle" hidden>
+  <header class="drawer-header"><div><span class="eyebrow">КАРТОЧКА КЛИЕНТА</span><h2 id="cardTitle" tabindex="-1">Карточка</h2><p id="cardMeta"></p></div><button type="button" class="icon-button" data-action="close-card" aria-label="Закрыть карточку">×</button></header>
+  <div id="cardBody" class="drawer-body"></div>
+</aside>
+<dialog id="editorDialog"><form id="entityForm"><header class="dialog-header"><div><span class="eyebrow" id="dialogEyebrow">CRM WORKSPACE</span><h2 id="dialogTitle"></h2></div><button type="button" data-action="close-dialog" class="icon-button" aria-label="Закрыть окно">×</button></header><div id="dialogBody" class="dialog-body"></div><div class="dialog-footer"><p id="dialogStatus" role="status" aria-live="polite"></p><div><button type="button" class="btn" data-action="close-dialog">Отмена</button><button type="submit" class="btn primary" id="dialogSubmit">Сохранить</button></div></div></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
