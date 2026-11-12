@@ -1,0 +1,104 @@
+{
+  "checked_on": "2026-11-13",
+  "status": "verified_public_tariff_resource_estimate_not_order_quote",
+  "provider": "Selectel",
+  "region": "ru-3 / ru-3a (СПб; доступность при заказе проверить)",
+  "hours_per_month": 730,
+  "method": "Официальные публичные prices в копейках за час; деление на100; формула клиентского калькулятора price*periodMultiplier/KOPECKS_IN_RUBLE. Его месяц=730часов.",
+  "price_page": "https://selectel.ru/prices/calculator/",
+  "data_url": "https://cdn.selectel.ru/site/static/1794490273/prices/calculator/state.js",
+  "formula_url": "https://cdn.selectel.ru/site/3b880b5.js",
+  "rows": [
+    {
+      "item": "PostgreSQL: vCPU, два узла по 2",
+      "group": "ru-3",
+      "resource": "dbaas_compute_cores",
+      "qty": 4,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "1.40359667",
+      "rub_per_month": "4098.50"
+    },
+    {
+      "item": "PostgreSQL: RAM, два узла по 8 GiB",
+      "group": "ru-3",
+      "resource": "dbaas_compute_ram",
+      "qty": 16,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.4686297088",
+      "rub_per_month": "5473.59"
+    },
+    {
+      "item": "PostgreSQL: локальный диск, два по 64 GiB",
+      "group": "ru-3",
+      "resource": "dbaas_volume_gigabytes_local",
+      "qty": 128,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.03029",
+      "rub_per_month": "2830.30"
+    },
+    {
+      "item": "API: vCPU, один сервер 2",
+      "group": "ru-3a",
+      "resource": "compute_cores",
+      "qty": 2,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "1.0071072",
+      "rub_per_month": "1470.38"
+    },
+    {
+      "item": "API: RAM, один сервер 4 GiB",
+      "group": "ru-3a",
+      "resource": "compute_ram",
+      "qty": 4,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.3662208",
+      "rub_per_month": "1069.36"
+    },
+    {
+      "item": "API: локальный SSD 40 GiB",
+      "group": "ru-3a",
+      "resource": "volume_gigabytes_local",
+      "qty": 40,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.028338024",
+      "rub_per_month": "827.47"
+    },
+    {
+      "item": "API: резерв диска 40 GiB",
+      "group": "ru-3a",
+      "resource": "volume_backups_gigabytes",
+      "qty": 40,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.006171",
+      "rub_per_month": "180.19"
+    },
+    {
+      "item": "S3: 50 GiB стандартного хранения",
+      "group": "ru-3",
+      "resource": "space-mb",
+      "qty": 50,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.00351431386112",
+      "rub_per_month": "128.27"
+    },
+    {
+      "item": "API: публичный IPv4, 1 адрес",
+      "group": "ru-3",
+      "resource": "network_floatingips",
+      "qty": 1,
+      "hours": 730,
+      "rate_rub_per_unit_hour": "0.25968384",
+      "rub_per_month": "189.57"
+    }
+  ],
+  "subtotal_rub": "16267.64",
+  "exclusions": [
+    "Балансировщик/второй API для отказоустойчивости всего приложения",
+    "S3 исходящий трафик и операции по факту",
+    "Домен и почтовый провайдер",
+    "Администрирование и сопровождение приложения",
+    "Дополнительные резервы/межплощадочная отказоустойчивость"
+  ],
+  "tax_note": "Страница Selectel prices указывает НДС22%; подтверждение полной конфигурации в панели обязательно.",
+  "data_sha256": "9dca2d6de17dce548ef9dedb87b18b1d3da70142cefd11e25b357d8d6e24b0c6"
+}

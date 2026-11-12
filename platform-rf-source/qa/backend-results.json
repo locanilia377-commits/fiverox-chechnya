@@ -1,0 +1,50 @@
+{
+  "verified_on": "2026-11-13",
+  "status": "passed",
+  "tests": 35,
+  "passed": 35,
+  "failed": 0,
+  "evidence_level": "local_integration",
+  "test_report": "qa/backend-integration.tap",
+  "test_sources": ["server/test/integration.test.mjs", "server/test/privacy-regressions.test.mjs"],
+  "production_dependency_audit": {"status":"passed","info":0,"low":0,"moderate":0,"high":0,"critical":0},
+  "node": "24.22.1",
+  "database": "PostgreSQL 18.6 via PGlite 0.5.16, wasm32-unknown-emscripten",
+  "business_role": {
+    "current_user": "fiverox_runtime",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "owns_business_tables": false
+  },
+  "coverage": [
+    "database RLS limits clients, child records and audit",
+    "admin and coordinator global scope",
+    "two dealer identities with exact client assignment scope",
+    "safe pending transfer projection",
+    "accept, decline and atomic old-assignment revocation",
+    "old draft and idempotent replay denied after access revocation",
+    "old receipt is denied after re-granting the same user a new assignment",
+    "child version is re-read after parent lock, conditional update checks version",
+    "dealer organization switch removes prior assignment and offer visibility",
+    "staff-only contacts, notes and contract references are not leaked",
+    "client edits, activities, equipment validation and confirmed sales persist",
+    "stable-ID qualification and separate profile edit",
+    "version conflicts and operation payload conflicts",
+    "business transaction rollback when audit write fails",
+    "OTP delivered to synthetic local sink and consumed once",
+    "OTP expiry and failed-guess lockout",
+    "HTTP session, CSRF, Origin and HttpOnly cookie checks",
+    "user disable revokes session and following requests",
+    "runtime cannot rewrite or delete audit",
+    "all eight fields retained when creating a customer"
+  ],
+  "not_tested": [
+    "ordinary PostgreSQL with concurrent network connections",
+    "production SMTP delivery",
+    "actual Russian infrastructure and contracts",
+    "load for 30+ users",
+    "HA, recovery from backup, private S3 uploads and file malware scanning",
+    "production data migration or legal-compliance attestation"
+  ],
+  "notes": "PGlite serializes its single connection. The implementation uses one PostgreSQL client-row lock for dealer writes/reassignment, but these local tests do not prove concurrent multi-connection behavior. No real customer data, code, token or secret is included in this report."
+}

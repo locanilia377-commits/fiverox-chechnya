@@ -1,0 +1,18 @@
+{
+  "level": "local_model_and_public_payload",
+  "passed": 10,
+  "failed": 0,
+  "command": "node --test qa/frontend-model.test.mjs",
+  "public_companies": 178,
+  "market_rows": 48,
+  "api_same_origin_only": true,
+  "static_preview_auth_enabled": false,
+  "browser_integration": "not_tested_by_frontend_agent",
+  "production_rf_deployment": "not_deployed",
+  "notes": [
+    "Original basket defaults retained; custom values persist and reset.",
+    "Median 2025 primary Rosstat source remains unverified and is labeled.",
+    "Chechnya used-car annual series remains missing; partial periods are not compared as years.",
+    "Public payload excludes private CRM fields, direct personal contacts, Google Sheet IDs and Apps Script URLs."
+  ]
+}

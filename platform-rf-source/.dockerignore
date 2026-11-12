@@ -1,0 +1,10 @@
+**/node_modules
+**/data
+**/.data
+**/.env
+**/.env.*
+**/*.dump
+**/*.backup
+**/.git
+qa
+previous-results-baseline.json
