@@ -1,6 +1,7 @@
 // Google Sheets pilot transport. Credentials are sent only in a POST body.
 const endpointPattern=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
 const tokenPattern=/^[a-f0-9]{64}\.[a-f0-9]{64}$/;
+const readOnlyMethods=new Set(['crmSession','crmWorkspace','crmWorkspaceFresh','crmRead']);
 export const sessionLifetime=12*60*60*1000;
 export const rpcArity=Object.freeze({crmEmailStart:2,crmEmailVerify:3,crmEmailLogout:1,crmSession:1,crmWorkspace:1,crmWorkspaceFresh:1,crmRead:2,crmSaveRead:5,crmMoveRead:5,crmRecordRead:5,crmCreateLead:3,crmItemSave:5});
 export function endpointReady(value){return endpointPattern.test(value||'');}
@@ -15,7 +16,7 @@ export function createSheetsClient(backendUrl,{fetchImpl=fetch,onMeasure=()=>{},
       if(!response.ok)throw new Error('network');
       reply=await response.json();
     }catch{
-      throw new Error('CRM_NETWORK: Ответ сервера не получен. Изменение могло сохраниться. Повторите ту же команду без изменения полей.');
+      throw new Error(readOnlyMethods.has(method)?'CRM_NETWORK: Не удалось получить данные. Проверьте соединение и повторите загрузку.':'CRM_NETWORK: Ответ сервера не получен. Изменение могло сохраниться. Повторите ту же команду без изменения полей.');
     }finally{
       clearTimeout(timer);
       // Method and duration only. Never record body, email, code or token.
