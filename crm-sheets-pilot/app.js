@@ -38,7 +38,20 @@ const pendingOperations=new Map();
 const pendingMoves=new Map();
 let writeQueue=Promise.resolve();
 let cardReady=false, eventState='idle', workspaceError='';
+const crmRouteKey='fiverox.sheets.pilot.last-route';
 let lastCrmRoute='leads';
+let crmStatus='Загружаю кабинет…', crmSync='';
+function rememberCrmRoute(route){
+  lastCrmRoute=route;
+  try{sessionStorageSafe()?.setItem(crmRouteKey,route);}catch{}
+}
+function setCrmStatus(message,detail=crmSync){
+  crmStatus=message;
+  crmSync=detail;
+  if(!session||isPublic(screen))return;
+  $('syncStatus').textContent=message;
+  $('lastSync').textContent=detail;
+}
 const routeViews=new Map();
 function savedDuration(ms){return (ms/1000).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' с';}
 
@@ -78,7 +91,7 @@ async function write(name,args,key,validate=()=>true){
 function updateEmailResend(){clearTimeout(emailResendTimer);const delay=emailResendUntil-Date.now();resendEmail.disabled=delay>0;if(delay>0)emailResendTimer=setTimeout(updateEmailResend,delay);}
 function resetEmailSignIn(){emailAddress='';emailResendUntil=0;emailStart.reset();emailVerify.reset();setFormBusy(emailStart,false);setFormBusy(emailVerify,false);emailStart.hidden=false;emailVerify.hidden=true;$('emailDestination').textContent='';updateEmailResend();}
 function showSignIn(message=''){$('appShell').hidden=false;$('main').hidden=true;$('authScreen').hidden=false;$('signInPanel').open=true;resetEmailSignIn();drawNav();$('breadcrumb').textContent='Личный кабинет';$('syncStatus').textContent='Вход в CRM';$('refreshWorkspace').hidden=true;$('signOut').hidden=true;setFormBusy(emailStart,!apiAvailable());accessStatus('signInStatus',message||(!apiAvailable()?'Подключение тестовой Google CRM ещё не завершено.':''),!!message);$('authConnectionNote').hidden=apiAvailable();$('retrySession').hidden=!readStoredSession(sessionStorageSafe(),config.backendUrl);}
-function endSession(message=''){clearStoredSession(sessionStorageSafe(),config.backendUrl);session=null;$('sheetLink').hidden=true;$('sheetLink').removeAttribute('href');viewId+=1;requestId+=1;db=current=null;pendingOperations.clear();pendingMoves.clear();writeQueue=Promise.resolve();routeViews.clear();lastCrmRoute='leads';workspaceError='';saving=loading=false;closeCard(true);closeModal(true);$('dialogTitle').textContent='';$('dialogStatus').textContent='';$('main').replaceChildren();$('cardTitle').textContent='Карточка';$('cardMeta').textContent='';$('sidebarCount').textContent='Публичное исследование';$('lastSync').textContent='';$('toast').textContent='';$('toast').classList.remove('show');$('identityEmail').textContent='Личный кабинет';$('identityRole').textContent='Вход';$('avatar').textContent='?';notice();showSignIn(message);}
+function endSession(message=''){clearStoredSession(sessionStorageSafe(),config.backendUrl);session=null;$('sheetLink').hidden=true;$('sheetLink').removeAttribute('href');viewId+=1;requestId+=1;db=current=null;pendingOperations.clear();pendingMoves.clear();writeQueue=Promise.resolve();routeViews.clear();rememberCrmRoute('leads');setCrmStatus('Загружаю кабинет…','');workspaceError='';saving=loading=false;closeCard(true);closeModal(true);$('dialogTitle').textContent='';$('dialogStatus').textContent='';$('main').replaceChildren();$('cardTitle').textContent='Карточка';$('cardMeta').textContent='';$('sidebarCount').textContent='Публичное исследование';$('lastSync').textContent='';$('toast').textContent='';$('toast').classList.remove('show');$('identityEmail').textContent='Личный кабинет';$('identityRole').textContent='Вход';$('avatar').textContent='?';notice();showSignIn(message);}
 async function openSession(identity,{persist=true,workspace=null}={}){const display=identity?.email||'';if(identity?.role!=='admin'||typeof display!=='string'||!display||typeof identity.token!=='string'||!identity.token)throw new Error('CRM_FORBIDDEN: Сейчас тестовая CRM доступна только владельцу.');if(workspace)applyWorkspace(workspace);session=identity;if(persist)storeSession(sessionStorageSafe(),config.backendUrl,identity);viewId+=1;requestId+=1;if(!workspace)db=null;current=null;resetEmailSignIn();$('authScreen').hidden=true;$('main').hidden=false;$('appShell').hidden=false;$('identityEmail').textContent=display;$('identityRole').textContent=roleLabels.admin;$('avatar').textContent=display.slice(0,1).toUpperCase();$('signOut').hidden=false;const sheetUrl=verifiedSheetUrl(identity.sheetUrl);$('sheetLink').hidden=!sheetUrl;if(sheetUrl)$('sheetLink').href=sheetUrl;$('accessNotice').textContent='Тестовая CRM на закрытой Google Таблице. Доступ только владельцу; дилеры пока не приглашены. Сессия действует до 12 часов в этой вкладке.';if(workspace){render();showSynced();}else await loadWorkspace().catch(()=>{});}
 async function requestEmailCode(email){const view=viewId;let sent=false;setFormBusy(emailStart,true);setFormBusy(emailVerify,true);accessStatus('signInStatus','Запрашиваю код…');try{if(!emailProof)emailProof=Array.from(crypto.getRandomValues(new Uint8Array(32)),byte=>byte.toString(16).padStart(2,'0')).join('');await call('crmEmailStart',email,emailProof);if(view!==viewId)return;sent=true;emailAddress=email;emailResendUntil=Date.now()+90000;emailVerify.reset();$('emailDestination').textContent='Адрес: '+email;emailStart.hidden=true;emailVerify.hidden=false;accessStatus('signInStatus','Запрос на код принят. Проверьте «Входящие» и «Спам» и введите код в этой же вкладке. Код действует 10 минут. Повторить запрос можно через 90 секунд. Если письма нет, уточните у администратора, что у этого адреса есть доступ к тестовой CRM.');}catch(error){if(view===viewId)accessStatus('signInStatus',errorText(error),true);}finally{if(view===viewId){setFormBusy(emailStart,false);setFormBusy(emailVerify,false);updateEmailResend();if(sent)emailVerify.elements.code.focus();}}}
 emailStart.addEventListener('submit',event=>{event.preventDefault();const email=emailStart.elements.email.value.trim();if(email)requestEmailCode(email);});
@@ -98,25 +111,25 @@ function applyWorkspace(result){
   workspaceError='';
 }
 function showSynced(){
-  if(isPublic(screen))return;
-  $('syncStatus').textContent='Данные обновлены';
-  $('lastSync').textContent='Синхронизация '+new Intl.DateTimeFormat('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'}).format(new Date())+' МСК';
+  setCrmStatus('Данные обновлены','Синхронизация '+new Intl.DateTimeFormat('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'}).format(new Date())+' МСК');
 }
 async function loadWorkspace(force=false){
   if(loading||[...pendingMoves.values()].some(move=>move.status==='pending'))return;
   const view=viewId,request=++requestId;
   loading=true;
-  if(!isPublic(screen))$('syncStatus').textContent='Синхронизация…';
+  setCrmStatus('Синхронизация…');
   $('refreshWorkspace').disabled=true;
   try{
     const result=await crmCall(force?'crmWorkspaceFresh':'crmWorkspace');
     if(view!==viewId||request!==requestId)return;
     applyWorkspace(result);
-    if(!isPublic(screen)){notice();renderCrmAtSamePosition();showSynced();}
+    if(!isPublic(screen)){notice();renderCrmAtSamePosition();}
+    showSynced();
   }catch(error){
     if(view!==viewId||request!==requestId||error===abandoned)return;
     workspaceError=errorText(error);
-    if(!isPublic(screen)){notice(workspaceError,true);renderCrmAtSamePosition();$('syncStatus').textContent='Ошибка синхронизации';}
+    setCrmStatus('Ошибка синхронизации');
+    if(!isPublic(screen)){notice(workspaceError,true);renderCrmAtSamePosition();}
     throw error;
   }finally{
     if(view===viewId&&request===requestId){loading=false;setSaving(saving);}
@@ -152,7 +165,7 @@ function salesTable(items){return table(['Дата','Точка','Товар / �
 function activityCard(a){return `<article class="action-item"><div><h3>${esc(a.title)}</h3><p>${esc(db.leads.find(l=>l.id===a.leadId)?.name||'Клиент')} · ${esc(a.manager||'Не назначен')}</p><p>${day(a.due)} · ${esc(activityNames[a.kind])}</p></div>${btn('Открыть','edit-item',`data-kind="activity" data-id="${esc(a.id)}"`,'small')}</article>`;}
 function renderAnalytics(){const m=metrics(db),months=monthlyRevenue(db.sales,db.today),max=Math.max(...months.map(x=>x.amount),1),late=m.overdueActions.sort((a,b)=>a.due.localeCompare(b.due));return heading('Аналитика','Реальные записи CRM, текущая воронка и результаты сопровождения')+`<div class="stats">${stat('Накопленная выручка',money(m.revenue),'Подтверждённые материалы и услуги','accent')}${stat('RR · окно 60 дней',m.rr===null?'Нет данных':m.rr+'%',`${m.rrRepeats} из ${m.rrBase} завершённых окон`)}${stat('Покупающие точки',count(m.buyers),'Есть подтверждённая покупка')}${stat('Просроченные действия',count(late.length),'Незавершённые действия со сроком в прошлом',late.length?'attention':'')}</div><div class="analytics-grid"><section class="box"><h2>Распределение по этапам</h2>${db.stages.map((stage,i)=>{const n=db.leads.filter(l=>l.stage===stage).length;return `<div class="bar-row"><span>${esc(stage)}</span><div class="bar-track"><div class="bar-fill" style="width:${m.total?n/m.total*100:0}%;background:${colors[i%colors.length]}"></div></div><strong>${n}</strong></div>`;}).join('')}<p class="chart-legend">Текущее состояние карточек. Для расчёта конверсии нужна история переходов за выбранный период.</p></section><section class="box"><h2>Подтверждённые продажи по месяцам</h2>${m.sales.length?`<div class="monthly-chart" role="img" aria-label="Продажи за последние шесть месяцев: ${esc(months.map(x=>x.month+' '+money(x.amount)).join('; '))}">${months.map(x=>`<div class="month-col"><strong>${x.amount?money(x.amount):'—'}</strong><div class="month-bar" style="height:${Math.max(2,x.amount/max*125)}px"></div></div>`).join('')}</div><div class="month-labels">${months.map(x=>`<span>${esc(new Intl.DateTimeFormat('ru-RU',{month:'short'}).format(new Date(x.month+'-15T12:00:00Z')))}</span>`).join('')}</div>`:'<div class="empty-chart">График появится после первой подтверждённой продажи</div>'}<p class="chart-legend">Накопленная выручка не является прибылью или прогнозным LTV.</p></section></div><section class="box"><div class="box-header"><h2>Требуют внимания</h2>${btn('План действий','navigate','data-screen="plan"','small')}</div><div class="action-stack">${late.slice(0,5).map(activityCard).join('')||empty('Просроченных действий нет','Планируйте следующие шаги, чтобы сопровождение было регулярным.')}</div></section><section class="box table-box">${table(['Клиент','Первая покупка','Покупок','Накопленная выручка','RR · 60 дней'],m.cohorts.sort((a,b)=>b.revenue-a.revenue).map(c=>[leadButton(c.leadId),fullDay(c.first),count(c.count),money(c.revenue),pill(c.complete?(c.repeat?'Повторил':'Не повторил'):'Окно ещё не завершено',c.complete?(c.repeat?'green':'orange'):'blue')]))||empty('История покупок пока пуста','Клиентская аналитика рассчитывается только по подтверждённым продажам.')}</section><p class="chart-legend">RR: доля клиентов с повторной покупкой в течение 60 дней после первой. В знаменатель входят только клиенты с завершённым окном наблюдения. Ручная отчётность может быть неполной.</p>`;}
 function drawNav(){const counts=db?{leads:db.leads.filter(l=>!closedStages.has(l.stage)).length,plan:metrics(db).openActions.length}:{};const item=([route,icon,label],publicRoute=false)=>`<button class="nav-item ${publicRoute?'public ':''}${screen===route?'active':''}" data-action="navigate" data-screen="${route}" ${screen===route?'aria-current="page"':''}><span class="nav-icon" aria-hidden="true">${icon}</span><span>${label}</span>${counts[route]?`<span class="nav-badge">${count(counts[route])}</span>`:''}</button>`;$('nav').innerHTML=`<div class="public-section-label">РЕГИОН И ПОТЕНЦИАЛ</div>${publicRoutes.map(r=>item(r,true)).join('')}<div class="public-section-label">РАБОТА С КЛИЕНТАМИ</div>${routes.map(r=>item(r)).join('')}`;$('breadcrumb').textContent=allRoutes().find(r=>r[0]===screen)?.[2]||'Рынок региона';document.title=$('breadcrumb').textContent+' · FIVEROX';$('sidebarCount').textContent=db?countLabel(db.leads.length,'клиент','клиента','клиентов')+(isStaff()?' в контуре':' · доступны вам'):'Исследование региона';$('refreshWorkspace').hidden=!session||isPublic(screen);}
-function render(){drawNav();if(isPublic(screen)){$('authScreen').hidden=true;$('main').hidden=false;$('main').innerHTML=publicUI?publicUI.render(screen):empty(publicLoadFailed?'Исследование пока недоступно':'Загружаю исследование',publicLoadFailed?'Обновите страницу, чтобы повторить загрузку.':'');$('main').insertAdjacentHTML('afterbegin',`<div class="public-return">${btn(session?'Вернуться в CRM':'Открыть CRM','return-crm','','small')}</div>`);$('syncStatus').textContent='Снимок 07.11.2026';$('lastSync').textContent='Исследование региона · рабочая CRM отделена';return;}if(!session){showSignIn();return;}$('authScreen').hidden=true;$('main').hidden=false;if(!db){$('main').innerHTML=workspaceError?empty('Данные пока недоступны',workspaceError,btn('Повторить','refresh')):'<div class="loading-state">Загружаю рабочие данные…</div>';return;}const renders={leads:()=>renderLeads(),customers:()=>renderLeads(true),plan:()=>renderActivities(),visits:()=>renderActivities('visit'),tests:()=>renderActivities('test'),equipment:()=>renderActivities('equipment'),transfers:renderTransfers,sales:renderSales,analytics:renderAnalytics};$('main').innerHTML=(renders[screen]||renders.leads)();$('main').insertAdjacentHTML('afterbegin','<p class="scope-note">Тестовая CRM · доступ только владельцу · данные сохраняются в закрытую Google Таблицу.</p>');setSaving(saving);}
+function render(){drawNav();if(isPublic(screen)){$('authScreen').hidden=true;$('main').hidden=false;$('main').innerHTML=publicUI?publicUI.render(screen):empty(publicLoadFailed?'Исследование пока недоступно':'Загружаю исследование',publicLoadFailed?'Обновите страницу, чтобы повторить загрузку.':'');$('main').insertAdjacentHTML('afterbegin',`<div class="public-return">${btn(session?'Вернуться в CRM':'Открыть CRM','return-crm','','small')}</div>`);$('syncStatus').textContent='Снимок 07.11.2026';$('lastSync').textContent='Исследование региона · рабочая CRM отделена';return;}if(!session){showSignIn();return;}setCrmStatus(crmStatus);$('authScreen').hidden=true;$('main').hidden=false;if(!db){$('main').innerHTML=workspaceError?empty('Данные пока недоступны',workspaceError,btn('Повторить','refresh')):'<div class="loading-state">Загружаю рабочие данные…</div>';return;}const renders={leads:()=>renderLeads(),customers:()=>renderLeads(true),plan:()=>renderActivities(),visits:()=>renderActivities('visit'),tests:()=>renderActivities('test'),equipment:()=>renderActivities('equipment'),transfers:renderTransfers,sales:renderSales,analytics:renderAnalytics};$('main').innerHTML=(renders[screen]||renders.leads)();$('main').insertAdjacentHTML('afterbegin','<p class="scope-note">Тестовая CRM · доступ только владельцу · данные сохраняются в закрытую Google Таблицу.</p>');setSaving(saving);}
 function renderCrmAtSamePosition(){
   if(isPublic(screen))return;
   const left=$('main').querySelector('.board')?.scrollLeft;
@@ -177,7 +190,7 @@ async function navigate(next,{push=true}={}){
   if($('editorDialog').open)$('editorDialog').close();
   modal=null;
   screen=next;
-  if(!isPublic(screen))lastCrmRoute=screen;
+  if(!isPublic(screen))rememberCrmRoute(screen);
   const saved=routeViews.get(screen)||{};
   ({query='',mode='board',filterStage='',filterDue='',filterManager='',itemStatus=''}=saved);
   if(push)history.pushState(null,'','#'+screen);
@@ -262,8 +275,7 @@ function applySavedCard(record,message,statusId){
   upsertById(db.leads,current);
   renderCrmAtSamePosition();
   renderDrawer();
-  $('syncStatus').textContent='Сохранено';
-  $('lastSync').textContent='Последнее сохранение: '+savedDuration(lastWriteMilliseconds);
+  setCrmStatus('Сохранено','Последнее сохранение: '+savedDuration(lastWriteMilliseconds));
   accessStatus(statusId,message+' · '+savedDuration(lastWriteMilliseconds));
 }
 $('cardBody').addEventListener('submit',async event=>{
@@ -341,7 +353,7 @@ async function sendMove(move){
   move.status='pending';
   renderCrmAtSamePosition();
   if(current?.id===move.id)setSaving(saving);
-  if(!isPublic(screen))$('syncStatus').textContent='Сохраняется этап…';
+  setCrmStatus('Сохраняется этап…');
   try{
     const result=await write('crmMoveCard',[move.id,move.previous,move.target],'move:'+move.id,
       reply=>validMove(reply,move.id));
@@ -357,14 +369,12 @@ async function sendMove(move){
       if(drawerTab==='history')void loadCardEvents();
     }
     renderCrmAtSamePosition();
-    if(!isPublic(screen)){
-      const changedAgain=card.stage!==move.target;
-      const synchronized=result.conflict||changedAgain;
-      $('syncStatus').textContent=[...pendingMoves.values()].some(item=>item.status==='pending')
-        ?'Сохраняется этап…':synchronized?'Данные обновлены':'Этап сохранён';
-      if(!synchronized)$('lastSync').textContent='Последнее сохранение: '+savedDuration(lastWriteMilliseconds);
-      toast(synchronized?'Показан актуальный этап карточки.':'Этап сохранён · '+savedDuration(lastWriteMilliseconds),synchronized);
-    }
+    const synchronized=result.conflict||card.stage!==move.target;
+    const hasPending=[...pendingMoves.values()].some(item=>item.status==='pending');
+    const hasUnknown=[...pendingMoves.values()].some(item=>item.status==='unknown');
+    const status=hasPending?'Сохраняется этап…':hasUnknown?'Этап не подтверждён':synchronized?'Данные обновлены':'Этап сохранён';
+    setCrmStatus(status,synchronized?undefined:'Последнее сохранение: '+savedDuration(lastWriteMilliseconds));
+    if(!isPublic(screen))toast(synchronized?'Показан актуальный этап карточки.':'Этап сохранён · '+savedDuration(lastWriteMilliseconds),synchronized);
   }catch(error){
     if(error===abandoned||move.view!==viewId)return;
     // A response or canonical re-read can fail after the atomic commit.
@@ -373,8 +383,8 @@ async function sendMove(move){
     else move.status='unknown';
     renderCrmAtSamePosition();
     if(current?.id===move.id)renderDrawer();
+    setCrmStatus(pendingMoves.has(move.id)?'Этап не подтверждён':'Перенос отклонён');
     if(!isPublic(screen)){
-      $('syncStatus').textContent=pendingMoves.has(move.id)?'Этап не подтверждён':'Перенос отклонён';
       toast(pendingMoves.has(move.id)?'Этап не подтверждён. Нажмите «Повторить перенос» на карточке.':errorText(error),true);
     }
   }
@@ -429,7 +439,14 @@ async function restoreSession(){
 }
 async function initialize(){
   screen=allRoutes().some(r=>r[0]===location.hash.slice(1))?location.hash.slice(1):'market';
-  if(!isPublic(screen))lastCrmRoute=screen;
+  if(!isPublic(screen)){
+    rememberCrmRoute(screen);
+  }else{
+    try{
+      const route=sessionStorageSafe()?.getItem(crmRouteKey);
+      if(routes.some(item=>item[0]===route))lastCrmRoute=route;
+    }catch{}
+  }
   $('appShell').hidden=false;
   $('authScreen').hidden=true;
   $('identityEmail').textContent='Личный кабинет';
