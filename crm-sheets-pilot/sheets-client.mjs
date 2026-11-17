@@ -1,9 +1,9 @@
 // Google Sheets pilot transport. Credentials are sent only in a POST body.
 const endpointPattern=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
 const tokenPattern=/^[a-f0-9]{64}\.[a-f0-9]{64}$/;
-const readOnlyMethods=new Set(['crmSession','crmWorkspace','crmWorkspaceFresh','crmRead']);
+const readOnlyMethods=new Set(['crmSession','crmWorkspace','crmWorkspaceFresh','crmRead','crmResume','crmCard','crmEvents']);
 export const sessionLifetime=12*60*60*1000;
-export const rpcArity=Object.freeze({crmEmailStart:2,crmEmailVerify:3,crmEmailLogout:1,crmSession:1,crmWorkspace:1,crmWorkspaceFresh:1,crmRead:2,crmSaveRead:5,crmMoveRead:5,crmRecordRead:5,crmCreateLead:3,crmItemSave:5});
+export const rpcArity=Object.freeze({crmEmailStart:2,crmEmailVerify:3,crmEmailLogout:1,crmSession:1,crmResume:1,crmCard:2,crmEvents:2,crmSaveCard:5,crmMoveCard:5,crmWorkspace:1,crmWorkspaceFresh:1,crmRead:2,crmSaveRead:5,crmMoveRead:5,crmRecordRead:5,crmCreateLead:3,crmItemSave:5});
 export function endpointReady(value){return endpointPattern.test(value||'');}
 export function createSheetsClient(backendUrl,{fetchImpl=fetch,onMeasure=()=>{},now=()=>performance.now()}={}){
   return async function call(method,...args){
